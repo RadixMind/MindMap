@@ -6,7 +6,30 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "test-results", "playwright-report"]),
+  globalIgnores([
+    "**/dist/**",
+    "**/node_modules/**",
+    "artifacts/**",
+    "logs/**",
+    "site/.astro/**",
+    "test-results/**",
+    "playwright-report/**",
+  ]),
+  {
+    files: ["**/*.mjs"],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: globals.node,
+    },
+  },
+  {
+    files: ["scripts/capture-site.mjs", "scripts/qa-site.mjs"],
+    languageOptions: {
+      globals: globals.browser,
+    },
+  },
   {
     files: ["**/*.{ts,tsx}"],
     extends: [

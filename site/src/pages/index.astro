@@ -1,0 +1,129 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro'
+import HeroMindMap from '../components/HeroMindMap'
+import RuntimeLab from '../components/RuntimeLab'
+---
+<SiteLayout>
+  <section class="hero">
+    <div class="shell shell--wide hero__grid">
+      <div class="hero__copy">
+        <h1>Structure ideas.<em>Ship only what matters.</em></h1>
+        <p class="hero__lead">Streaming Markdown visualized as thought. Start with deterministic SVG, add a viewer, or compose a focused editor from opt-in features.</p>
+        <div class="hero__actions">
+          <a class="button button--primary" href="/playground/">Open playground <span aria-hidden="true">↗</span></a>
+          <a class="button button--secondary" href="/docs/getting-started/">Read docs</a>
+        </div>
+      </div>
+      <div class="hero__visual">
+        <HeroMindMap client:load />
+      </div>
+    </div>
+  </section>
+
+  <div class="trust-strip">
+    <div class="shell trust-strip__inner">
+      <div class="trust-strip__install"><span>Install</span><code>pnpm add @xiangfa/mindmap</code></div>
+      <div class="trust-strip__items">
+        <span>React 18-19</span><span>TypeScript</span><span>Pure SVG</span><span>SSR-ready core</span><span>AI streaming</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="runtime">
+    <div class="shell">
+      <div class="section-heading">
+        <div><h2>A runtime that ends where your product begins.</h2></div>
+        <p>Most users need a viewer. Editors need a focused command loop. Open MindMap v0.9.0 keeps each runtime explicit so product surfaces can stay small and testable.</p>
+      </div>
+      <RuntimeLab client:visible />
+    </div>
+  </section>
+
+  <section class="section section--line">
+    <div class="shell">
+      <div class="section-heading">
+        <div><h2>From incomplete text to a stable visual system.</h2></div>
+        <p>Incoming model output is grouped by render frame, parsed into stable node identities, diffed as immutable patches, and laid out without browser-only dependencies.</p>
+      </div>
+      <div class="pipeline">
+        <article class="pipeline__stage">
+          <div class="pipeline__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16M4 10h11M4 15h14M4 20h8" /></svg></div>
+          <h3>Streaming buffer</h3><p>Incomplete chunks are coalesced before they reach the React surface.</p>
+        </article>
+        <article class="pipeline__stage">
+          <div class="pipeline__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 4H4v16h4M16 4h4v16h-4M9 8l-2 4 2 4M15 8l2 4-2 4" /></svg></div>
+          <h3>Stable parser</h3><p>Markdown, frontmatter, tasks, and remarks become a deterministic document.</p>
+        </article>
+        <article class="pipeline__stage">
+          <div class="pipeline__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12c6 0 5-6 10-6M7 12c6 0 5 6 10 6"/></svg></div>
+          <h3>Patch controller</h3><p>Insert, update, move, and remove operations preserve identity and history.</p>
+        </article>
+        <article class="pipeline__stage">
+          <div class="pipeline__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h18v14H3z"/><path d="M7 15c3-7 7 3 10-6"/></svg></div>
+          <h3>SVG scene</h3><p>Static, viewer, and editor surfaces share the same deterministic geometry.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--line">
+    <div class="shell">
+      <div class="section-heading">
+        <div><h2>Advanced when invited. Invisible when omitted.</h2></div>
+        <p>History, search, import, export, Markdown editing, AI, folding, tags, multiline nodes, and dotted connections all live behind independent entry points.</p>
+      </div>
+      <div class="bento">
+        <article class="bento-card bento-card--wide">
+          <h3>Compose the exact editor.</h3><p>The base editor exposes commands and slots. Every advanced tool contributes behavior and interface without expanding the core contract.</p>
+          <div class="module-stack" aria-hidden="true"><span>editor <i>base</i></span><span>features/history <i>on demand</i></span><span>features/search <i>on demand</i></span><span>features/ai <i>on demand</i></span></div>
+        </article>
+        <article class="bento-card bento-card--side">
+          <h3>SVG for sight. A semantic tree for assistive tech.</h3><p>Keyboard navigation, visible focus, non-drag alternatives, and reduced-motion behavior are treated as runtime features, not documentation notes.</p>
+          <div class="accessibility-tree" aria-hidden="true"><span>role="tree"</span><span>├─ aria-level="1"</span><span>├─ aria-expanded</span><span>└─ aria-selected</span></div>
+        </article>
+        <article class="bento-card bento-card--third">
+          <h3>No React. No DOM.</h3><p>Use parser, layout, patches, streaming, and standalone SVG generation in workers, servers, or custom renderers.</p>
+          <div class="mini-chart" aria-hidden="true"><i style="height:24%"></i><i style="height:40%"></i><i style="height:33%"></i><i style="height:62%"></i><i style="height:52%"></i><i style="height:77%"></i><i style="height:68%"></i><i style="height:88%"></i></div>
+        </article>
+        <article class="bento-card bento-card--third">
+          <h3>Styles split with behavior.</h3><p>Static, viewer, editor, and every feature publish independent stylesheets that match their public entrypoints.</p>
+        </article>
+        <article class="bento-card bento-card--third">
+          <h3>Adopt one surface at a time.</h3><p>The root <code>MindMap</code> export maps to the editor runtime while explicit entries make new viewer and static surfaces easy to adopt.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--line" id="benchmarks">
+    <div class="shell">
+      <div class="section-heading">
+        <div><h2>Keep claims close to the code.</h2></div>
+        <p>Release checks cover the parser, layout, controller, public entrypoints, and website package. Numeric results appear here only after the current build writes fresh artifacts.</p>
+      </div>
+      <div class="benchmark-panel">
+        <div class="benchmark-intro">
+          <h3>Reproducible by design.</h3>
+          <p>The site reports what has been verified in the current checkout and leaves pending measurements clearly marked until the build completes.</p>
+          <div class="benchmark-meta"><span>core tests</span><span>entry checks</span><span>site build</span><span>visual review</span></div>
+        </div>
+        <div class="benchmark-data">
+          <div class="metric"><span>Parser and layout</span><strong>Ready</strong><em>covered by core tests</em></div>
+          <div class="metric"><span>Public package paths</span><strong>Ready</strong><em>checked during build</em></div>
+          <div class="metric"><span>Browser measurements</span><strong>Pending</strong><em>generated after validation</em></div>
+          <div class="metric"><span>Bundle numbers</span><strong>Pending</strong><em>never estimated on the site</em></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="shell">
+      <div class="cta__panel">
+        <h2>Build the map your interface actually needs.</h2>
+        <p>Open the full feature playground, or begin with the lightweight Viewer and add only the capabilities that survive your product requirements.</p>
+        <div class="cta__actions"><a class="button button--primary" href="/playground/">Open playground</a><a class="button button--secondary" href="/docs/getting-started/">Read docs</a></div>
+      </div>
+    </div>
+  </section>
+</SiteLayout>

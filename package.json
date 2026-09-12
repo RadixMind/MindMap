@@ -1,47 +1,159 @@
 {
   "name": "@xiangfa/mindmap",
-  "description": "A beautiful, interactive mind map component for React.",
+  "description": "A modular, AI-native React mind map runtime with static, viewer, and editor entry points.",
   "license": "Apache-2.0",
   "private": false,
-  "version": "0.7.1",
+  "version": "0.9.0",
+  "packageManager": "pnpm@10.30.3",
   "type": "module",
-  "main": "dist/mindmap.umd.cjs",
-  "module": "dist/esm/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
   "sideEffects": [
-    "*.css"
+    "**/*.css"
   ],
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/mindmap.umd.cjs"
-      }
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./core": {
+      "types": "./dist/types/entries/core.d.ts",
+      "import": "./dist/core.js",
+      "require": "./dist/core.cjs"
+    },
+    "./static": {
+      "types": "./dist/types/entries/static.d.ts",
+      "import": "./dist/static.js",
+      "require": "./dist/static.cjs"
     },
     "./viewer": {
-      "import": {
-        "types": "./dist/viewer.d.ts",
-        "default": "./dist/esm/MindMapViewer.js"
-      }
+      "types": "./dist/types/entries/viewer.d.ts",
+      "import": "./dist/viewer.js",
+      "require": "./dist/viewer.cjs"
     },
-    "./style.css": "./dist/style.css"
+    "./editor": {
+      "types": "./dist/types/entries/editor.d.ts",
+      "import": "./dist/editor.js",
+      "require": "./dist/editor.cjs"
+    },
+    "./features/history": {
+      "types": "./dist/types/entries/features/history.d.ts",
+      "import": "./dist/features/history.js",
+      "require": "./dist/features/history.cjs"
+    },
+    "./features/search": {
+      "types": "./dist/types/entries/features/search.d.ts",
+      "import": "./dist/features/search.js",
+      "require": "./dist/features/search.cjs"
+    },
+    "./features/import": {
+      "types": "./dist/types/entries/features/import.d.ts",
+      "import": "./dist/features/import.js",
+      "require": "./dist/features/import.cjs"
+    },
+    "./features/export": {
+      "types": "./dist/types/entries/features/export.d.ts",
+      "import": "./dist/features/export.js",
+      "require": "./dist/features/export.cjs"
+    },
+    "./features/markdown-editor": {
+      "types": "./dist/types/entries/features/markdown-editor.d.ts",
+      "import": "./dist/features/markdown-editor.js",
+      "require": "./dist/features/markdown-editor.cjs"
+    },
+    "./features/ai": {
+      "types": "./dist/types/entries/features/ai.d.ts",
+      "import": "./dist/features/ai.js",
+      "require": "./dist/features/ai.cjs"
+    },
+    "./extensions": {
+      "types": "./dist/types/entries/extensions/index.d.ts",
+      "import": "./dist/extensions/index.js",
+      "require": "./dist/extensions/index.cjs"
+    },
+    "./extensions/cross-link": {
+      "types": "./dist/types/entries/extensions/cross-link.d.ts",
+      "import": "./dist/extensions/cross-link.js",
+      "require": "./dist/extensions/cross-link.cjs"
+    },
+    "./extensions/tags": {
+      "types": "./dist/types/entries/extensions/tags.d.ts",
+      "import": "./dist/extensions/tags.js",
+      "require": "./dist/extensions/tags.cjs"
+    },
+    "./extensions/folding": {
+      "types": "./dist/types/entries/extensions/folding.d.ts",
+      "import": "./dist/extensions/folding.js",
+      "require": "./dist/extensions/folding.cjs"
+    },
+    "./extensions/frontmatter": {
+      "types": "./dist/types/entries/extensions/frontmatter.d.ts",
+      "import": "./dist/extensions/frontmatter.js",
+      "require": "./dist/extensions/frontmatter.cjs"
+    },
+    "./extensions/latex": {
+      "types": "./dist/types/entries/extensions/latex.d.ts",
+      "import": "./dist/extensions/latex.js",
+      "require": "./dist/extensions/latex.cjs"
+    },
+    "./extensions/multiline": {
+      "types": "./dist/types/entries/extensions/multiline.d.ts",
+      "import": "./dist/extensions/multiline.js",
+      "require": "./dist/extensions/multiline.cjs"
+    },
+    "./extensions/dotted-line": {
+      "types": "./dist/types/entries/extensions/dotted-line.d.ts",
+      "import": "./dist/extensions/dotted-line.js",
+      "require": "./dist/extensions/dotted-line.cjs"
+    },
+    "./styles/tokens.css": "./dist/styles/tokens.css",
+    "./styles/static.css": "./dist/styles/static.css",
+    "./styles/viewer.css": "./dist/styles/viewer.css",
+    "./styles/editor.css": "./dist/styles/editor.css",
+    "./styles/features/history.css": "./dist/styles/features/history.css",
+    "./styles/features/search.css": "./dist/styles/features/search.css",
+    "./styles/features/import.css": "./dist/styles/features/import.css",
+    "./styles/features/export.css": "./dist/styles/features/export.css",
+    "./styles/features/markdown-editor.css": "./dist/styles/features/markdown-editor.css",
+    "./styles/features/ai.css": "./dist/styles/features/ai.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "README.zh-CN.md",
+    "CHANGELOG.md",
+    "MIGRATION-v0.9.md",
+    "docs/Mindmap Syntax Specification.md",
+    "docs/Extended Mindmap Syntax Support.md",
+    "docs/Custom Styling.md",
+    "docs/refactor-v0.9.0-requirements.md",
+    "LICENSE"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "build:lib": "rm -rf dist && vite build --mode lib && tsc -p tsconfig.lib.json",
+    "dev": "pnpm build:lib && pnpm --dir site dev",
+    "dev:site": "pnpm build:lib && pnpm --dir site dev",
+    "clean:lib": "node scripts/clean-lib.mjs",
+    "build": "pnpm build:lib && pnpm --dir site build",
+    "build:lib": "pnpm clean:lib && vite build --mode lib && tsc -p tsconfig.lib.json && node scripts/copy-styles.mjs && node scripts/build-manifest.mjs",
+    "build:site": "pnpm build:lib && pnpm --dir site build",
+    "check:site": "pnpm build:lib && pnpm --dir site check",
     "lint": "eslint .",
-    "preview": "vite preview",
     "test": "vitest run",
     "test:unit": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "benchmark": "node scripts/benchmark.mjs",
+    "qa:site": "node scripts/qa-site.mjs",
+    "capture:site": "node scripts/capture-site.mjs",
+    "record:check": "node scripts/run-check.mjs",
+    "verify:boundaries": "node scripts/verify-boundaries.mjs",
+    "verify:pack": "node scripts/verify-pack.mjs",
+    "verify:clean-source": "node scripts/verify-clean-source.mjs",
+    "report:verification": "python3 scripts/write-verification-report.py",
+    "verify": "pnpm test && pnpm build:lib && pnpm verify:boundaries && pnpm verify:pack && pnpm benchmark && pnpm --dir site check && pnpm --dir site build",
+    "pack:dry": "node scripts/verify-pack.mjs",
+    "preview": "pnpm --dir site preview"
   },
   "peerDependencies": {
     "katex": ">=0.16",
@@ -53,14 +165,11 @@
       "optional": true
     }
   },
-  "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
-  },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.60.0",
     "@types/node": "^24.12.0",
+    "@types/jsdom": "^27.0.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.0",
@@ -68,7 +177,10 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "jsdom": "^27.0.0",
     "lucide-react": "^1.20.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.0",

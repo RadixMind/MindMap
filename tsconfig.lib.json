@@ -5,12 +5,15 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "declaration": true,
+    "declarationMap": true,
     "emitDeclarationOnly": true,
-    "outDir": "dist",
+    "rootDir": "src/components/MindMap",
+    "outDir": "dist/types",
+    "types": ["react", "react-dom"],
     "strict": true,
     "skipLibCheck": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/components/MindMap"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+  "include": ["src/components/MindMap/**/*"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/__tests__/**"]
 }

@@ -1,0 +1,27 @@
+---
+interface Props {
+  active: 'overview' | 'syntax' | 'ai' | 'styling' | 'api'
+}
+
+const { active } = Astro.props
+const isActive = (name: Props['active']) => active === name ? 'is-active' : undefined
+---
+<aside class="docs-sidebar" aria-label="Documentation navigation">
+  <span>Overview</span>
+  <a class={isActive('overview')} href="/docs/">Introduction</a>
+  <a href="/docs/getting-started/">Getting started</a>
+
+  <span>Syntax</span>
+  <a class={isActive('syntax')} href="/docs/syntax/">Markdown syntax</a>
+  <a href="/docs/syntax/#basic-syntax">Basic syntax</a>
+  <a href="/docs/syntax/#extended-syntax">Extensions</a>
+
+  <span>Guides</span>
+  <a class={isActive('ai')} href="/docs/ai/">AI generation</a>
+  <a class={isActive('styling')} href="/docs/styling/">Custom styling</a>
+
+  <span>Reference</span>
+  <a class={isActive('api')} href="/docs/api/">API reference</a>
+  <a href="/docs/api/#keyboard-shortcuts">Keyboard shortcuts</a>
+  <a href="/docs/api/#utility-functions">Core utilities</a>
+</aside>

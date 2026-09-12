@@ -1,0 +1,5 @@
+.mm-feature-search { height:34px;display:flex;align-items:center;gap:4px;padding:0 4px 0 9px;border:1px solid color-mix(in srgb,var(--mm-muted) 18%,transparent);border-radius:10px;background:color-mix(in srgb,var(--mm-muted) 5%,transparent); }
+.mm-feature-search>span { color:var(--mm-muted);font-size:13px; }
+.mm-feature-search input { width:112px;border:0;outline:0;background:transparent;color:var(--mm-text);font:500 10px var(--mm-font); }
+.mm-feature-search input::placeholder{color:var(--mm-muted)}
+.mm-feature-search small{min-width:20px;color:var(--mm-muted);font-size:8px;text-align:right}.mm-feature-search button{width:24px!important;height:24px!important;padding:0!important;font-size:15px!important}

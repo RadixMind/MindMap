@@ -1,0 +1,264 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro'
+import DocsSidebar from '../../components/DocsSidebar.astro'
+---
+<SiteLayout title="Markdown syntax - Open MindMap" description="The Open MindMap v0.9 Markdown syntax, inline formatting, remarks, tasks, and opt-in extensions.">
+  <div class="shell docs-layout">
+    <DocsSidebar active="syntax" />
+
+    <article class="docs-content">
+      <span class="eyebrow">Syntax guide</span>
+      <h1>Markdown that keeps its shape.</h1>
+      <p>Open MindMap reads a small Markdown-like outline into a Document. The parser preserves multiple roots, node attributes, comments, and frontmatter while extensions add syntax without changing the core Node shape.</p>
+      <div class="docs-callout">The <code>core</code> parser is headless. Pass the extensions your surface needs to <code>parseMindMap</code>, <code>MindMapViewer</code>, or <code>MindMapEditor</code>. <code>basicMindMapExtensions()</code> enables tags, folding, multiline content, and dotted lines; cross-links and LaTeX remain explicit additions.</div>
+
+      <h2 id="basic-syntax">Basic syntax</h2>
+      <p>A line without a list marker is a root. A line beginning with <code>-</code> becomes a child, and indentation determines its depth. Blank lines separate independent root trees. Tabs are treated as two spaces by the parser.</p>
+      <div class="code-block"><pre><code>Machine Learning
+- Supervised Learning
+  - Classification
+  - Regression
+- Unsupervised Learning
+  - Clustering
+  - Dimensionality Reduction
+
+Application Areas
+- Natural Language Processing
+- Computer Vision</code></pre></div>
+      <p>The parser also accepts <code>*</code> and <code>+</code> as list markers. Use <code>+</code> for a collapsed branch only when the folding extension is enabled, and <code>-.</code> for a dotted relationship only when the dotted-line extension is enabled.</p>
+      <p>Use the public entrypoint in an application:</p>
+      <div class="code-block"><pre><code>import &#123; parseMindMap &#125; from '@xiangfa/mindmap/core'
+import &#123; basicMindMapExtensions &#125; from '@xiangfa/mindmap/extensions'
+
+const extensions = basicMindMapExtensions()
+
+const document = parseMindMap(markdown, &#123;
+  extensions,
+&#125;)</code></pre></div>
+
+      <h3>Roots, depth, and safe limits</h3>
+      <p>One root may be written without a marker. Multiple roots are separated by a blank line and are stored in <code>document.roots</code>. Public Document boundaries enforce the same limits before cloning, traversal, layout, rendering, patch application, or resolver callbacks.</p>
+      <div class="docs-table-wrap"><table class="docs-table">
+        <thead><tr><th>Limit</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Markdown or aggregate Document content</td><td>1,000,000 UTF-16 code units</td></tr>
+          <tr><td>Nodes / nesting depth / ID length</td><td>20,000 / 256 / 256</td></tr>
+          <tr><td>Metadata entries / comments</td><td>256 / 4,096</td></tr>
+          <tr><td>Attribute collection / aggregate entries</td><td>1,024 / 100,000</td></tr>
+          <tr><td>Tags / multiline lines / cross-links per node</td><td>128 / 256 / 64</td></tr>
+          <tr><td>Inline tokens per line / images per Document</td><td>4,096 / 64</td></tr>
+          <tr><td>Render primitives / direct patch batch</td><td>100,000 / 256</td></tr>
+        </tbody>
+      </table></div>
+      <p>Attributes must be acyclic JSON trees without shared object identities or accessors. The Export Feature separately rejects raw SVG over 16 MiB before URI encoding or image decoding. The <code>MAX_MINDMAP_*</code> exports in <code>@xiangfa/mindmap/core</code> are the authoritative constants.</p>
+      <h3>Icons and emoji</h3>
+      <p>Unicode text is preserved in labels, so emoji can be used directly wherever ordinary node text is accepted.</p>
+      <div class="code-block"><pre><code>Product map 🧭
+- 📊 Research
+  - 🏷️ Segments
+- 🚀 Delivery</code></pre></div>
+
+      <h2 id="text-formatting">Text formatting</h2>
+      <p>Node labels use the shared inline tokenizer. Formatting is rendered in the Viewer and Editor, and the same tokenization is used by the SVG renderer.</p>
+      <div class="code-block"><pre><code>Product plan
+- **Important** decision
+- *Open question*
+- ~~Deprecated~~ approach
+- `component-name`
+- ==Key concept==
+- [Project brief](https://example.com)
+- $E = mc^2$</code></pre></div>
+      <div class="docs-table-wrap"><table class="docs-table">
+        <thead><tr><th>Syntax</th><th>Effect</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>**text**</code> or <code>__text__</code></td><td><strong>Bold</strong></td><td>Emphasis for a label</td></tr>
+          <tr><td><code>*text*</code> or <code>_text_</code></td><td><em>Italic</em></td><td>Supplementary emphasis</td></tr>
+          <tr><td><code>~~text~~</code></td><td><s>Strikethrough</s></td><td>Deprecated or completed wording</td></tr>
+          <tr><td><code>`text`</code></td><td><code>Code</code></td><td>Identifiers and technical terms</td></tr>
+          <tr><td><code>==text==</code></td><td>Highlight</td><td>Highlighted concept</td></tr>
+          <tr><td><code>$formula$</code></td><td>Math token</td><td>Rendered with the optional LaTeX path</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2 id="links-images">Links and images</h2>
+      <p>Use Markdown link and image tokens inside a node. Link URLs may be HTTP(S), <code>mailto:</code>, <code>tel:</code>, relative paths, or fragments. The runtime rejects executable schemes, control characters, backslashes, and protocol-relative URLs before putting a value in the DOM or SVG.</p>
+      <div class="code-block"><pre><code>Resources
+- [Project brief](https://example.com/brief)
+- [Local notes](./notes)
+- [Jump to the API](#api)
+- ![Architecture diagram](https://cdn.example.com/architecture.png)</code></pre></div>
+      <p>Raster PNG, JPEG, GIF, and WebP data URLs are allowed within the shared limits. Remote HTTP(S) images are denied by default and render as alt text. Set <code>remoteImagePolicy</code> to an origin predicate, or to <code>"allow"</code> only when every sanitized remote URL is trusted. A controller policy is inherited by its surfaces unless a surface overrides it. Authorized DOM images use anonymous CORS and no referrer.</p>
+      <p>Relative image paths are not embedded by the portable exporter. PNG export of remote images requires an explicitly authorized host <code>imageResolver</code> that returns a safe raster data URL. Unresolved URLs still follow <code>remoteImagePolicy</code>, and PNG conversion rejects any remaining remote image reference.</p>
+
+      <h2 id="remarks">Remarks</h2>
+      <p>A line beginning with <code>&gt;</code> attaches supporting text to the preceding node. Consecutive remark lines are joined with newlines and stay out of the child list. Interactive surfaces expose the remark as supporting node information, while SVG output keeps it in an accessible <code>&lt;title&gt;</code>.</p>
+      <div class="code-block"><pre><code>Machine Learning
+- Supervised Learning
+  &gt; Learn a mapping from labeled examples.
+  &gt; Use it to predict new inputs.
+  - Classification
+    &gt; The output is a discrete category.
+  - Regression
+    &gt; The output is a continuous value.</code></pre></div>
+
+      <h2 id="comments">Comments</h2>
+      <p>A line that begins with <code>%%</code>, optionally after whitespace, is a comment. Comments are stored separately from the rendered tree with their position relative to the preceding node. They remain available to Markdown serialization and the optional text editor but are not rendered as nodes.</p>
+      <div class="code-block"><pre><code>%% This stays in the source view
+Research plan
+%% The next branch is still visible
+- Interviews
+  - Capture questions
+  %% This note stays hidden from the map
+  - Record decisions</code></pre></div>
+      <p>An inline occurrence such as <code>test%%demo</code> is ordinary node text; only a line prefix starts a comment.</p>
+
+      <h2 id="task-status">Task status</h2>
+      <p>Task markers use the familiar Markdown form and become a namespaced <code>task.status</code> attribute on the Node.</p>
+      <div class="code-block"><pre><code>Learning Plan Q1
+- Basic Theory
+  - [x] Linear Algebra
+  - [x] Probability Theory
+  - [-] Optimization Theory
+  - [ ] Information Theory
+- Practical Projects
+  - [x] Handwritten Digit Recognition
+  - [-] Text Classification
+  - [ ] Image Segmentation</code></pre></div>
+      <div class="docs-table-wrap"><table class="docs-table">
+        <thead><tr><th>Syntax</th><th><code>task.status</code></th><th>Visual marker</th></tr></thead>
+        <tbody>
+          <tr><td><code>- [ ] text</code></td><td><code>todo</code></td><td>Empty task box</td></tr>
+          <tr><td><code>- [-] text</code></td><td><code>doing</code></td><td>In-progress marker</td></tr>
+          <tr><td><code>- [x] text</code> or <code>- [X] text</code></td><td><code>done</code></td><td>Completed marker</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2 id="extended-syntax">Extended syntax</h2>
+      <p>Extensions are small, composable objects. They transform parsed Nodes, serialization, layout edges, or child visibility. Keep the extension array stable between renders by defining it at module scope or memoizing it with <code>useMemo</code>, so the runtime can reuse its compiled extension graph.</p>
+      <div class="code-block"><pre><code>import &#123;
+  basicMindMapExtensions,
+  crossLinkExtension,
+  latexExtension,
+&#125; from '@xiangfa/mindmap/extensions'
+
+const extensions = [
+  ...basicMindMapExtensions(),
+  crossLinkExtension(),
+  latexExtension(),
+]</code></pre></div>
+
+      <h3>Dotted lines</h3>
+      <p>Use <code>-.</code> as a child marker for a weak or optional relationship. The dotted-line extension stores a namespaced connection attribute and changes the parent-child edge to a dashed path.</p>
+      <div class="code-block"><pre><code>Machine Learning
+- Supervised Learning
+  - Classification
+  -. Optional feature branch</code></pre></div>
+
+      <h3>Multiline node content</h3>
+      <p>With the multiline extension enabled, a line beginning with <code>|</code> is appended to the preceding node as <code>attributes.multiline.lines</code>. It is displayed inside the node, unlike a remark.</p>
+      <div class="code-block"><pre><code>Machine Learning
+- Classification
+  | **Input**: feature vector X
+  | **Output**: category Y</code></pre></div>
+      <div class="docs-table-wrap"><table class="docs-table">
+        <thead><tr><th>Syntax</th><th>Stored as</th><th>Display</th></tr></thead>
+        <tbody><tr><td><code>&gt; text</code></td><td><code>attributes.remark.text</code></td><td>Supporting node information</td></tr><tr><td><code>| text</code></td><td><code>attributes.multiline.lines[]</code></td><td>Additional in-node lines</td></tr></tbody>
+      </table></div>
+
+      <h3>Tags</h3>
+      <p>The tags extension extracts <code>#tag</code> labels from node text into <code>attributes.tags.values</code>. It renders the tags as badges and lets the Editor search Feature filter and focus matching branches.</p>
+      <div class="code-block"><pre><code>Tech Stack
+- React #frontend #javascript
+  - Next.js #framework #ssr
+- Python #backend #ml
+  - FastAPI #framework</code></pre></div>
+
+      <h3>Cross-node connections</h3>
+      <p>The cross-link extension defines an anchor with <code>&#123;#id&#125;</code> and adds a cross-branch edge with <code>-&gt; &#123;#id&#125;</code>. An optional quoted label is rendered beside the edge. <code>-.&gt;</code> creates a dotted cross-link.</p>
+      <div class="code-block"><pre><code>System Architecture
+- Frontend &#123;#frontend&#125;
+  - API call -&gt; &#123;#gateway&#125; "HTTP"
+- Backend
+  - API Gateway &#123;#gateway&#125;
+  - Cache -.&gt; &#123;#frontend&#125;</code></pre></div>
+      <p>Anchors become durable generated IDs such as <code>mm-anchor-gateway</code>. A link to a missing anchor is ignored during layout, and self-links are ignored.</p>
+
+      <h3>Folding markers</h3>
+      <p>Use <code>+</code> instead of <code>-</code> to mark a branch collapsed by default. The folding extension filters the branch in the projection while retaining its children in the Document. Viewer and Editor users can expand it through the fold control or the keyboard command.</p>
+      <div class="code-block"><pre><code>Project Structure
+- src/
+  - components/
+    - Button.tsx
+  + utils/
+    - format.ts
+    - validate.ts</code></pre></div>
+
+      <h3>Formula support</h3>
+      <p>The LaTeX extension marks Nodes containing <code>$...$</code>. The React runtime loads the optional KaTeX peer only for a marked Node; portable SVG preparation can use the same path with a safe MathML renderer. If KaTeX is unavailable or rendering fails, the source formula remains readable.</p>
+      <div class="code-block"><pre><code>Loss Functions
+- MSE
+  | $L = \frac&#123;1&#125;&#123;n&#125;\sum_&#123;i=1&#125;^&#123;n&#125;(y_i - \hat&#123;y&#125;_i)^2$
+- Cross Entropy
+  | $L = -\sum_i y_i\log(\hat&#123;y&#125;_i)$</code></pre></div>
+      <p>Install KaTeX only when this extension is part of the product bundle:</p>
+      <div class="code-block"><pre><code>pnpm add katex</code></pre></div>
+
+      <h3>Frontmatter</h3>
+      <p>Frontmatter at the beginning of a Markdown source stores document-wide metadata. The core parser currently projects <code>direction</code> and <code>theme</code> into the Document and preserves other key/value metadata for round trips.</p>
+      <div class="code-block"><pre><code>---
+direction: right
+theme: auto
+---
+
+Project
+- Research
+- Delivery</code></pre></div>
+      <div class="docs-table-wrap"><table class="docs-table">
+        <thead><tr><th>Key</th><th>Values</th><th>Effect</th></tr></thead>
+        <tbody><tr><td><code>direction</code></td><td><code>left</code>, <code>right</code>, <code>both</code></td><td>Initial layout direction</td></tr><tr><td><code>theme</code></td><td><code>auto</code>, <code>light</code>, <code>dark</code></td><td>Initial runtime theme</td></tr></tbody>
+      </table></div>
+
+      <h3>Combined example</h3>
+      <div class="code-block"><pre><code>---
+direction: both
+theme: dark
+---
+
+Product roadmap
+- **Discovery** #research
+  &gt; Confirm the problem before building.
+  - [x] Interviews
+  | 12 customer conversations
+- **Delivery**
+  + Prototype
+    - API -&gt; &#123;#service&#125;
+- Service &#123;#service&#125;
+  | $p(success) = 0.8$</code></pre></div>
+
+      <h3>Quick reference</h3>
+      <div class="docs-table-wrap"><table class="docs-table">
+        <thead><tr><th>Feature</th><th>Syntax</th><th>Extension</th></tr></thead>
+        <tbody>
+          <tr><td>Root / child</td><td>Plain text / <code>- text</code></td><td>Core</td></tr>
+          <tr><td>Inline formatting</td><td><code>**bold**</code>, <code>*italic*</code>, <code>~~strike~~</code>, <code>`code`</code>, <code>==highlight==</code></td><td>Core tokenizer</td></tr>
+          <tr><td>Link / image</td><td><code>[label](url)</code> / <code>![alt](url)</code></td><td>Core renderer policy</td></tr>
+          <tr><td>Remark / comment</td><td><code>&gt; note</code> / <code>%% note</code></td><td>Core</td></tr>
+          <tr><td>Task</td><td><code>- [ ]</code>, <code>- [-]</code>, <code>- [x]</code></td><td>Core</td></tr>
+          <tr><td>Dotted / multiline / tags / folding</td><td><code>-.</code>, <code>|</code>, <code>#tag</code>, <code>+</code></td><td>Built-in extensions</td></tr>
+          <tr><td>Cross-link / LaTeX</td><td><code>&#123;#id&#125;</code>, <code>-&gt; &#123;#id&#125;</code> / <code>$...$</code></td><td>Explicit extensions</td></tr>
+        </tbody>
+      </table></div>
+    </article>
+
+    <aside class="docs-toc" aria-label="On this page">
+      <span>On this page</span>
+      <a href="#basic-syntax">Basic syntax</a>
+      <a href="#text-formatting">Text formatting</a>
+      <a href="#links-images">Links and images</a>
+      <a href="#remarks">Remarks</a>
+      <a href="#comments">Comments</a>
+      <a href="#task-status">Task status</a>
+      <a href="#extended-syntax">Extended syntax</a>
+    </aside>
+  </div>
+</SiteLayout>

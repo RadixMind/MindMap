@@ -1,838 +1,253 @@
-<div align="center">
-
 # Open MindMap
 
-[![npm version](https://img.shields.io/npm/v/@xiangfa/mindmap)](https://www.npmjs.com/package/@xiangfa/mindmap)
-[![npm downloads](https://img.shields.io/npm/dm/@xiangfa/mindmap)](https://www.npmjs.com/package/@xiangfa/mindmap)
-[![npm gzip size](https://deno.bundlejs.com/badge?q=@xiangfa/mindmap@0.6.5/viewer)](https://bundlejs.com/?q=%40xiangfa%2Fmindmap%400.6.5%2Fviewer)
 [![license](https://img.shields.io/npm/l/@xiangfa/mindmap)](./LICENSE)
-[![react](https://img.shields.io/badge/react-%E2%89%A518-blue)](https://react.dev)
+[![React](https://img.shields.io/badge/react-%E2%89%A518-149eca)](https://react.dev)
 
-A beautiful, interactive mind map component for React.
+Open MindMap is a modular React and TypeScript runtime for interactive SVG mind maps. Version 0.9.0 separates the headless Document Runtime, static rendering, read-only viewing, editing, optional Features, and syntax Extensions into explicit package entries.
 
-**Natively supports AI stream output** with Markdown list syntax and **iOS-style UI**.
-
-Zero dependencies. SVG-based. Keyboard-first. Dark mode ready.
+The v0.9.0 refactor is a breaking interface upgrade. The implementation and validation record are kept in [the refactor requirements](docs/refactor-v0.9.0-requirements.md). This README intentionally does not publish benchmark numbers or claim checks that have not been rerun against the current repository.
 
 English | [中文](README.zh-CN.md)
 
-</div>
-
----
-
-![Open MindMap](https://github.com/u14app/mindmap/blob/main/public/screenshot.png)
-
-## Features
-
-- **AI stream ready** — natively supports AI streaming output; feed a markdown list in, get a real-time mind map out
-- **Built-in AI generation** — connect any OpenAI-compatible API to generate mind maps from natural language; supports text, image, and PDF attachments
-- **Pure SVG rendering** — no canvas, no external layout engines, razor-sharp at any zoom level
-- **iOS-style UI** — frosted glass controls, rounded corners, smooth animations, clean and polished design
-- **Plugin system** — 7 built-in plugins for extended syntax (dotted lines, folding, multi-line, tags, cross-links, LaTeX, frontmatter); fully extensible
-- **Inline formatting** — **bold**, _italic_, `code`, ~~strikethrough~~, ==highlight==, and [links](url) inside nodes
-- **Task status** — `[x]` done, `[ ]` todo, `[-]` in-progress checkboxes
-- **Remarks** — multi-line remarks attached to nodes via `>` syntax
-- **Text editing mode** — toggle between visual mind map and plain-text markdown editing
-- **Full-screen mode** — expand the component to fill the viewport
-- **LaTeX math** — render `$...$` inline and `$$...$$` display formulas (requires KaTeX)
-- **Cross-links** — draw edges between arbitrary nodes via `{#anchor}` / `-> {#target}`
-- **Lightweight Viewer** — a standalone read-only component (`MindMapViewer`) with ~48% smaller bundle; import via `@xiangfa/mindmap/viewer` for minimal footprint
-- **Readonly mode** — display-only with pan/zoom/select but no editing; ideal for presentations and embeds
-- **Multiple root nodes** — build separate trees on the same canvas
-- **Drag & drop** — reorder siblings by dragging; drag root's children across the center line to rebalance sides
-- **Undo / redo** — canvas-level history for visual edits, imports, drag reorder, cut/paste, and programmatic replacements
-- **Search & tag filtering** — find nodes, jump between matches, and dim non-matching tag branches while preserving ancestor context
-- **Keyboard shortcuts** — Arrow keys to navigate, Tab/Shift+Enter to add child/sibling, Enter/F2 to edit, Delete to remove, Cmd/Ctrl+Z to undo, Cmd+C/V to copy/paste, Shift+ shortcuts for zoom & layout
-- **Markdown I/O** — feed a markdown list in, get a mind map out (great for AI streaming)
-- **i18n** — auto-detects browser language; built-in Chinese and English, fully customizable via props
-- **Dark mode** — auto-detects `prefers-color-scheme`, or set `light` / `dark` explicitly
-- **Export** — SVG, high-DPI PNG, and Markdown export out of the box
-- **Import** — paste JSON or markdown data via the context menu import dialog
-- **Context menu** — right-click to add root nodes, import data, export, or change layout
-- **Layout modes** — left, right, or balanced (both) layout directions
-- **Mobile optimized** — full touch support with single-finger pan/drag and two-finger pinch-to-zoom centered on content
-- **Toolbar control** — show/hide zoom, history, search, and tag controls via the `toolbar` prop
-- **Tiny footprint** — zero runtime dependencies beyond React
-
-## Installation
+## Install
 
 ```bash
-# npm
-npm install @xiangfa/mindmap
-
-# pnpm
 pnpm add @xiangfa/mindmap
-
-# yarn
-yarn add @xiangfa/mindmap
 ```
 
-For LaTeX math rendering, also install KaTeX (optional):
+React and ReactDOM are peer dependencies. KaTeX remains optional and is needed only when the LaTeX Extension is used.
 
-```bash
-npm install katex
-```
+## Choose an entry
 
-## Quick Start
+| Use case | Import | Stylesheet |
+| --- | --- | --- |
+| Headless parsing, layout, patches, streaming, and SVG helpers | `@xiangfa/mindmap/core` | None |
+| Static SVG surface | `@xiangfa/mindmap/static` | `@xiangfa/mindmap/styles/static.css` |
+| Read-only pan, zoom, selection, and fit | `@xiangfa/mindmap/viewer` | `@xiangfa/mindmap/styles/viewer.css` |
+| Editing surface | `@xiangfa/mindmap/editor` | `@xiangfa/mindmap/styles/editor.css` |
+| Optional editor capability | `@xiangfa/mindmap/features/*` | Matching feature stylesheet |
+| Syntax or render extension | `@xiangfa/mindmap/extensions/*` | Matching stylesheet when provided |
+
+The root `@xiangfa/mindmap` entry exposes the v0.9 editor contract. Use the explicit entries when a smaller or headless dependency graph is useful. `legacy-viewer`, `cognitive`, `cognitive/react`, and the cognitive fallback stylesheet are not v0.9 public entries.
+
+## Quick start
 
 ```tsx
-import { MindMap } from "@xiangfa/mindmap";
-import "@xiangfa/mindmap/style.css";
+import { MindMapEditor } from '@xiangfa/mindmap/editor'
+import '@xiangfa/mindmap/styles/editor.css'
 
-const data = `
-My Mind Map
-  - First Topic
-    - Subtopic A
-    - Subtopic B
-  - Second Topic
-`;
+const markdown = `Product strategy
+- Research
+  - Interviews
+  - Positioning
+- Delivery
+  - Prototype`
 
-function App() {
-  return <MindMap markdown={data} />;
+export function StrategyMap() {
+  return <MindMapEditor markdown={markdown} />
 }
 ```
 
-> **Note:** The component fills its parent container. Make sure the parent has explicit dimensions.
+The component fills its parent. Give the parent an explicit width and height.
 
-## Usage
-
-### Multiple Root Nodes
-
-Pass an array to render independent trees on the same canvas:
+For a read-only surface:
 
 ```tsx
-<MindMap data={[tree1, tree2, tree3]} />
-```
+import { MindMapViewer } from '@xiangfa/mindmap/viewer'
+import '@xiangfa/mindmap/styles/viewer.css'
 
-### Markdown Input
-
-Feed a markdown list directly — perfect for streaming AI responses:
-
-```tsx
-const markdown = `
-Machine Learning
-  - Supervised Learning
-    - Classification
-    - Regression
-  - Unsupervised Learning
-
-Application Areas
-  - NLP
-  - Computer Vision
-`;
-
-<MindMap markdown={markdown} />;
-```
-
-Separate root trees with a blank line in the markdown.
-
-### Readonly Mode
-
-Display a mind map without allowing edits — perfect for presentations, documentation, or embedding:
-
-```tsx
-<MindMap data={data} readonly />
-```
-
-In readonly mode, users can still pan, zoom, and select nodes, but cannot create, edit, or delete nodes. The context menu hides editing actions (new root node, import) while keeping view-only actions (export, layout).
-
-### Lightweight Viewer
-
-For read-only use cases where bundle size matters (dashboards, documentation, embeds), use `MindMapViewer` — a standalone component that excludes editing hooks, AI input, context menu, export utils, and more, resulting in a ~48% smaller bundle.
-
-```tsx
-// Minimal bundle via sub-path import:
-import { MindMapViewer } from "@xiangfa/mindmap/viewer";
-import "@xiangfa/mindmap/style.css";
-
-<MindMapViewer markdown={markdown} />;
-```
-
-Or import from the main entry (tree-shakeable):
-
-```tsx
-import { MindMapViewer } from "@xiangfa/mindmap";
-```
-
-`MindMapViewer` supports all rendering features: themes, plugins, pan/zoom, fold toggle, remark tooltips, and keyboard shortcuts for zoom and layout. It does **not** include editing, drag-drop, AI generation, context menu, export, or text editor.
-
-### Text Editor Mode
-
-Pass the `MindMapTextEditor` component to enable a built-in text editing mode with syntax highlighting. Users can toggle between the visual mind map and a markdown text editor via a button in the bottom-right corner.
-
-```tsx
-import { MindMap, MindMapTextEditor } from "@xiangfa/mindmap";
-
-<MindMap markdown={markdown} textEditor={MindMapTextEditor} />;
-```
-
-The text editor is opt-in and tree-shakeable — it is only bundled when you import and pass it. If omitted, the text mode toggle button is hidden.
-
-### Dark Mode
-
-```tsx
-<MindMap data={data} theme="auto" />  {/* follow system (default) */}
-<MindMap data={data} theme="dark" />  {/* always dark */}
-<MindMap data={data} theme="light" /> {/* always light */}
-```
-
-### Custom Styling
-
-Override CSS custom properties on the container to customize colors, fonts, and more:
-
-```css
-/* Override theme variables */
-.mindmap-container {
-  --mindmap-root-bg: #1a73e8;
-  --mindmap-canvas-bg: #f0f4f8;
-  --mindmap-node-text: #1a1a2e;
+export function ReadOnlyMap({ markdown }: { markdown: string }) {
+  return <MindMapViewer markdown={markdown} autoFit="initial" />
 }
 ```
 
-Target specific elements with semantic CSS classes:
-
-```css
-/* Style all edges */
-.mindmap-edge {
-  stroke-width: 3;
-}
-
-/* Style root node background */
-.mindmap-node-root .mindmap-node-bg {
-  fill: #6c5ce7;
-}
-```
-
-Customize individual branch colors via `data-branch-index`:
-
-```css
-.mindmap-edge[data-branch-index="0"] {
-  stroke: #e74c3c;
-}
-.mindmap-edge[data-branch-index="1"] {
-  stroke: #2ecc71;
-}
-```
-
-#### CSS Variable Groups
-
-| Group         | Variables                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Canvas        | `--mindmap-canvas-bg`                                                                                                              |
-| Root Node     | `--mindmap-root-bg`, `--mindmap-root-text`, `--mindmap-root-font-size`, `--mindmap-root-font-weight`, `--mindmap-root-font-family` |
-| Child Nodes   | `--mindmap-node-text`, `--mindmap-node-font-size`, `--mindmap-node-font-weight`, `--mindmap-node-font-family`                      |
-| Level 1       | `--mindmap-level1-font-size`, `--mindmap-level1-font-weight`                                                                       |
-| Edges         | `--mindmap-edge-width`                                                                                                             |
-| Selection     | `--mindmap-selection-stroke`, `--mindmap-selection-fill`                                                                           |
-| Highlight     | `--mindmap-highlight-text`, `--mindmap-highlight-bg`                                                                               |
-| Add Button    | `--mindmap-addbtn-fill`, `--mindmap-addbtn-hover`, `--mindmap-addbtn-icon`                                                         |
-| Controls      | `--mindmap-controls-bg`, `--mindmap-controls-text`, `--mindmap-controls-hover`                                                     |
-| Context Menu  | `--mindmap-ctx-bg`, `--mindmap-ctx-text`, `--mindmap-ctx-hover`, `--mindmap-ctx-border`, `--mindmap-ctx-shadow`                    |
-| Branch Colors | `--mindmap-branch-0` through `--mindmap-branch-9`                                                                                  |
-
-#### CSS Class Selectors
-
-| Class                     | Target               |
-| ------------------------- | -------------------- |
-| `.mindmap-node-root`      | Root node group      |
-| `.mindmap-node-child`     | Child node group     |
-| `.mindmap-node-bg`        | Node background rect |
-| `.mindmap-node-text`      | Node text element    |
-| `.mindmap-node-underline` | Child node underline |
-| `.mindmap-edge`           | Connection line      |
-| `.mindmap-edge-label`     | Edge label text      |
-| `.mindmap-add-btn`        | Add child button     |
-| `.mindmap-fold-btn`       | Fold/unfold toggle   |
-| `.mindmap-tag`            | Tag badge            |
-
-Exported SVGs embed a `<style>` block with resolved CSS values and include the same semantic classes and `data-branch-index` attributes, so standalone SVGs render correctly without external CSS.
-
-> See [Custom Styling Guide](docs/Custom%20Styling.md) for the full list of 30+ CSS variables, class selectors, and examples.
-
-### Layout Direction
+For a static surface:
 
 ```tsx
-<MindMap data={data} defaultDirection="both" />  {/* balanced (default) */}
-<MindMap data={data} defaultDirection="right" /> {/* all children right */}
-<MindMap data={data} defaultDirection="left" />  {/* all children left */}
+import { StaticMindMap } from '@xiangfa/mindmap/static'
+import '@xiangfa/mindmap/styles/static.css'
+
+<StaticMindMap markdown={markdown} />
 ```
 
-### i18n / Localization
+## Core runtime
 
-The UI language is auto-detected from the browser's language setting. Built-in support for Chinese (`zh-CN`) and English (`en-US`), with English as the default fallback. You can also override the locale or any text string:
-
-```tsx
-{
-  /* Auto-detect (default) - uses browser language */
-}
-<MindMap data={data} />;
-
-{
-  /* Force a specific locale */
-}
-<MindMap data={data} locale="en-US" />;
-
-{
-  /* Override specific strings */
-}
-<MindMap data={data} locale="en-US" messages={{ newNode: "New Topic" }} />;
-
-{
-  /* Fully custom locale */
-}
-<MindMap
-  data={data}
-  messages={{
-    newNode: "Nuevo nodo",
-    zoomIn: "Acercar",
-    zoomOut: "Alejar",
-    // ... override any key from MindMapMessages
-  }}
-/>;
-```
-
-### Plugins
-
-The plugin system extends the mind map with additional syntax and rendering capabilities. All 7 built-in plugins are enabled by default. You can also select specific plugins:
+The `core` entry is independent of React and browser rendering. It provides the public Document, Node, Patch, layout, parser, serializer, controller, stream, Extension, and SVG types and functions.
 
 ```tsx
 import {
-  MindMap,
-  allPlugins, // all 7 plugins
-  frontMatterPlugin, // YAML frontmatter
-  dottedLinePlugin, // dotted line edges
-  foldingPlugin, // collapsible nodes
-  multiLinePlugin, // multi-line content
-  tagsPlugin, // hashtag support
-  crossLinkPlugin, // cross-references
-  latexPlugin, // LaTeX math (requires KaTeX)
-} from "@xiangfa/mindmap";
+  createMarkdownStream,
+  createMindMapController,
+  parseMindMap,
+  renderMindMapToSvg,
+  serializeMindMap,
+} from '@xiangfa/mindmap/core'
 
-{
-  /* Use all plugins (default behavior) */
-}
-<MindMap data={data} plugins={allPlugins} />;
+const document = parseMindMap('Root\n- Branch')
+const controller = createMindMapController(document)
+const stream = createMarkdownStream({ initialMarkdown: 'Root' })
 
-{
-  /* Pick only the plugins you need */
-}
-<MindMap data={data} plugins={[foldingPlugin, tagsPlugin]} />;
+stream.subscribe(({ document: next, patches }) => {
+  console.log(next, patches)
+})
+stream.append('\n- Generated branch')
 
-{
-  /* Disable all plugins */
-}
-<MindMap data={data} plugins={[]} />;
+const markdownAgain = serializeMindMap(controller.getSnapshot().document)
+const svg = renderMindMapToSvg(document)
 ```
 
-### Ref API
+The controller publishes frozen snapshots with structural sharing and change events. Treat public Document and snapshot values as read-only; use controller commands to publish changes. Document changes, selection, and Viewport state are separate concerns. Use the controller interface instead of maintaining a second tree in a Feature or host application.
 
-Access imperative methods via a ref:
+## Editor Features
 
-```tsx
-import { useRef } from "react";
-import { MindMap, type MindMapRef } from "@xiangfa/mindmap";
+Features are opt-in and consume the shared controller. Available entry names are:
 
-function App() {
-  const ref = useRef<MindMapRef>(null);
-
-  const handleExportPNG = async () => {
-    const blob = await ref.current!.exportToPNG();
-    // ... download blob
-  };
-
-  const handleExportSVG = () => {
-    const svgString = ref.current!.exportToSVG();
-    // ... download svg
-  };
-
-  return <MindMap ref={ref} data={data} />;
-}
-```
-
-### AI Generation
-
-Add a built-in AI input bar to generate mind maps from natural language. Connects to any OpenAI-compatible API with streaming support:
+- `features/history`
+- `features/search`
+- `features/import`
+- `features/export`
+- `features/markdown-editor`
+- `features/ai`
 
 ```tsx
-<MindMap
-  ai={{
-    apiUrl: "https://api.openai.com/v1/chat/completions",
-    apiKey: "sk-...",
-    model: "gpt-5",
-  }}
+import { MindMapEditor } from '@xiangfa/mindmap/editor'
+import { historyFeature } from '@xiangfa/mindmap/features/history'
+import { searchFeature } from '@xiangfa/mindmap/features/search'
+import '@xiangfa/mindmap/styles/editor.css'
+import '@xiangfa/mindmap/styles/features/history.css'
+import '@xiangfa/mindmap/styles/features/search.css'
+
+const features = [historyFeature(), searchFeature()]
+
+<MindMapEditor
+  markdown={markdown}
+  features={features}
 />
 ```
 
-Enable file attachments (text, image, PDF):
+Create Feature and Extension arrays at module scope, or memoize them with `useMemo`, so their identities remain stable between renders. A recreated array is treated as a new configuration and can remount feature sessions.
+
+The AI Feature accepts a host generator that returns complete Markdown or an async iterable of Markdown chunks. The generator receives the current prompt, Markdown, Document, and an `AbortSignal`. Keep credentials behind a server-side proxy in production.
 
 ```tsx
-<MindMap
-  ai={{
-    apiUrl: "https://api.openai.com/v1/chat/completions",
-    apiKey: "sk-...",
-    model: "gpt-5",
-    attachments: ["text", "image", "pdf"],
-  }}
+import { aiFeature } from '@xiangfa/mindmap/features/ai'
+
+const ai = aiFeature({
+  generate: async ({ prompt, signal }) => generateMarkdownOnYourServer(prompt, signal),
+})
+
+const features = [ai]
+
+<MindMapEditor markdown={markdown} features={features} />
+```
+
+One successful AI generation, drag gesture, or grouped edit creates one committed history entry. Cancellation and failure restore the pre-operation Document. Stream frames remain live previews; use the controller event with `phase === 'commit'` when persistence must happen only after a transaction commits.
+
+## Syntax and Extensions
+
+The parser accepts Markdown-like tree input with multiple roots separated by a blank line. Existing project syntax includes:
+
+```text
+Roadmap
+- [x] Shipped task
+- [ ] Open task
+  > A remark can span lines
+  | A continuation line
+  + A collapsed branch
+```
+
+Task status, remarks, comments, frontmatter, folding, multiline content, tags, dotted connections, links and images, cross-links, and optional LaTeX are represented by the v0.9 parser and Extension contract. Extensions use namespaced attributes so the core Node shape remains stable. The requirements matrix records parser, renderer, export, and round-trip validation for each syntax item.
+
+## Input boundaries and remote images
+
+The runtime validates every public Document boundary before cloning, traversal, layout, rendering, patch application, or resolver callbacks. Markdown and aggregate Document content are limited to 1,000,000 UTF-16 code units, with at most 20,000 nodes and 256 nesting levels. The exported `MAX_MINDMAP_*` constants define the remaining hard limits for IDs, metadata, comments, attribute collections, tags, multiline content, cross-links, inline tokens, images, render primitives, and patch batches. The Export Feature also rejects raw SVG longer than 16 MiB before URI encoding or image decoding.
+
+Remote HTTP(S) images are denied by default and render as their alt text. Raster `data:` images remain available within the shared input limits. Authorize only the origins your application intends to contact with a predicate, or use `"allow"` when every sanitized remote image URL is trusted:
+
+```tsx
+const allowProductCdn = (url: string) =>
+  new URL(url).hostname === 'images.example.com'
+
+<MindMapViewer
+  markdown={markdown}
+  remoteImagePolicy={allowProductCdn}
 />
 ```
 
-Customize the system prompt:
+A policy supplied to `createMindMapController` is inherited by a surface using that controller; a surface prop overrides it. Authorized browser images use anonymous CORS and omit the referrer. For portable SVG or PNG, pass an explicitly authorized `imageResolver` to `prepareMindMapSvg`; unresolved remote images still follow `remoteImagePolicy`, and PNG conversion requires them to be embedded.
+
+When a surface receives an external `controller`, content ownership is exclusive: do not also pass `document`, `data`, `markdown`, `defaultMarkdown`, or `documentRevision`. Conflicting content props fail synchronously so server rendering cannot expose stale controller content while a replacement is pending.
+
+## Viewport and selection
+
+`autoFit` accepts `initial`, `always`, or `never`:
+
+- `initial` fits the first usable layout and preserves later user pan and zoom.
+- `always` fits after eligible layout changes.
+- `never` leaves Viewport control to host code.
+
+Viewer and Editor refs expose `getDocument`, `getController`, `fitView`, `focusNode`, `selectNode`, and `setDirection`. The Editor ref also exposes `getMarkdown`, `startEditing`, `addChild`, `addSibling`, and `removeNode`.
+
+## Accessibility and input
+
+The rendered surface combines SVG presentation with a semantic tree. Keep keyboard alternatives available for pointer operations, preserve visible focus, and honor reduced-motion preferences. History and movement shortcuts apply to the active editor surface while text inputs retain native editing behavior.
+
+## Keyboard and events
+
+The Editor handles these commands when its surface has focus:
+
+| Key | Action |
+| --- | --- |
+| Arrow keys | Move selection through parent, child, and sibling nodes |
+| `Tab` | Add a child to the selected node |
+| `Shift + Enter` | Add a sibling after the selected node |
+| `Enter` or `F2` | Edit the selected node |
+| `Delete` or `Backspace` | Remove the selected node |
+| `Escape` | Clear selection or close the current edit path |
+| `Cmd/Ctrl + Z` | Undo |
+| `Cmd/Ctrl + Shift + Z` or `Cmd/Ctrl + Y` | Redo |
+
+Viewer and Editor expose `onSelectedNodeChange`, `onEvent`, and `onViewportChange`. Editor additionally exposes `onDocumentChange`, `onChange`, and `onMarkdownChange`. Document callbacks are live notifications and may receive transaction previews. Use `onEvent` with `phase === 'commit'` for commit-only persistence; do not persist Viewport changes as Document history.
+
+Controller events use four phases: `preview` for live transaction frames, `commit` for the final history entry, `rollback` when cancellation or failure restores the baseline, and `change` for selection or layout-only updates. `documentRevision` is the explicit host-controlled reset token: changing it replaces the Document, clears history, cancels active work, and permits restoring an older or identical authoritative value. Ordinary controlled echoes should keep the same revision.
+
+## Styling and themes
+
+Import the stylesheet that matches the runtime. Use `theme="light"`, `theme="dark"`, or `theme="auto"`, and pass `themeTokens` for runtime token overrides. The token and runtime styles are separate package exports so a static surface does not pull editor controls into its CSS graph.
 
 ```tsx
-<MindMap
-  ai={{
-    apiUrl: "https://api.openai.com/v1/chat/completions",
-    apiKey: "sk-...",
-    model: "gpt-5",
-    systemPrompt: "Generate a mind map about the given topic...",
-  }}
+<MindMapViewer
+  markdown={markdown}
+  theme="dark"
+  themeTokens={{ selection: '#55d9ff' }}
 />
 ```
 
-> **Security Note:** The API key is sent from the browser. For production, use a proxy endpoint to keep your key server-side.
+The previous aggregate `.mindmap-*` selector and `style.css` import are not the v0.9 contract. See [MIGRATION-v0.9.md](MIGRATION-v0.9.md) before carrying custom selectors forward.
 
-### Listening for Changes
+## Detailed syntax
 
-```tsx
-<MindMap
-  data={data}
-  onDataChange={(newData) => {
-    console.log("Mind map updated:", newData);
-  }}
-/>
-```
+The v0.9 parser and Extension contract are documented in the repository references and the migrated Astro site:
 
-### Toolbar Visibility
+- [Mindmap syntax specification](docs/Mindmap%20Syntax%20Specification.md)
+- [Extended syntax support](docs/Extended%20Mindmap%20Syntax%20Support.md)
+- [Custom styling reference](docs/Custom%20Styling.md)
 
-Control the toolbar via the `toolbar` prop:
-
-```tsx
-{
-  /* Hide all toolbar buttons */
-}
-<MindMap data={data} toolbar={false} />;
-
-{
-  /* Hide zoom controls while keeping history/search/tag controls */
-}
-<MindMap data={data} toolbar={{ zoom: false }} />;
-```
-
-The toolbar includes zoom/history controls (bottom-left), search and tag filters (top-left), and text mode / fullscreen toggle buttons (bottom-right). The `toolbar` prop accepts `zoom`, `history`, `search`, and `tags` flags; text mode and fullscreen buttons remain available.
-
-### Mobile / Touch Support
-
-The mind map has full touch support out of the box:
-
-- **Single finger on canvas** — pan the view
-- **Single finger on node** — drag to reorder siblings
-- **Two-finger pinch** — zoom in/out (always centers on mind map content)
-
-No configuration needed — touch support is always active alongside mouse events.
-
-## Extended Syntax
-
-The mind map supports rich markdown-like syntax. Features marked with _(plugin)_ require the corresponding plugin to be enabled (all are enabled by default).
-
-### Inline Formatting
-
-Format text inside any node:
-
-```
-**bold text**
-*italic text*
-`inline code`
-~~strikethrough~~
-==highlight==
-[link text](https://example.com)
-```
-
-### Links & Images
-
-Embed clickable hyperlinks and images within nodes:
-
-```
-Machine Learning
-- [Wikipedia](https://en.wikipedia.org/wiki/ML)
-- Architecture Overview ![](./arch.png)
-- Resources
-  - [Paper](https://arxiv.org/xxx)
-  - ![diagram](./flow.png)
-```
-
-- `[text](url)` — Node text becomes a clickable hyperlink.
-- `![alt](path)` — Embeds an image within a node using an SVG `<image>` element.
-
-> PNG export follows browser canvas security rules. Cross-origin images may require CORS headers or data URLs to export correctly.
-
-### Task Status
-
-Add checkboxes to track task state:
-
-```
-- [x] Completed task
-- [ ] Pending task
-- [-] In-progress task
-```
-
-### Remarks
-
-Attach multi-line remarks to a node using `>`:
-
-```
-- Node with a remark
-  > This is a remark line
-  > It can span multiple lines
-```
-
-### Comments
-
-Use `%%` to add comments that are only visible in the text editor and will not be rendered in the mind map:
-
-```
-%% This is a comment, it won't appear in the mind map
-Machine Learning
-%% Core learning paradigms
-- Supervised Learning
-  - Classification
-  - Regression
-- Unsupervised Learning
-  %% Additional paradigms stay hidden from the map
-  - Clustering
-```
-
-A line is treated as a comment only when `%%` appears at the beginning of the line (optionally preceded by whitespace). Inline occurrences like `test%%demo` are not treated as comments.
-
-### Frontmatter _(plugin)_
-
-Set default options at the top of your markdown:
-
-```
----
-direction: left
-theme: dark
----
-- Root Node
-  - Child
-```
-
-Supported fields: `direction` (`left` | `right` | `both`), `theme` (`light` | `dark` | `auto`).
-
-### Dotted Line _(plugin)_
-
-Use `-.` instead of `-` to render a node with a dotted edge:
-
-```
-- Solid edge node
-  -. Dotted edge child
-```
-
-### Folding / Collapsible Nodes _(plugin)_
-
-Use `+` instead of `-` to make a node initially collapsed:
-
-```
-- Visible node
-  + This node starts collapsed
-    - Hidden child
-```
-
-### Multi-line Content _(plugin)_
-
-Use `|` to add continuation lines to a node:
-
-```
-- First line of the node
-  | Second line
-  | Third line
-```
-
-### Tags _(plugin)_
-
-Add hashtags to nodes for visual labeling:
-
-```
-- React #framework #frontend
-- PostgreSQL #database
-```
-
-### Cross-links _(plugin)_
-
-Draw edges between arbitrary nodes:
-
-```
-- Node A {#a}
-  - Child
-- Node B {#b}
-  -> {#a} "references"
-```
-
-- `{#id}` — define an anchor on a node
-- `-> {#id}` — solid cross-link to the anchor
-- `-> {#id} "label"` — cross-link with a label
-- `-.> {#id}` — dotted cross-link
-
-### LaTeX Math _(plugin)_
-
-Render mathematical formulas (requires [KaTeX](https://katex.org/)):
-
-```
-- Inline math: $E = mc^2$
-- Display math: $$\sum_{i=1}^{n} x_i$$
-```
-
-## API Reference
-
-### Props
-
-| Prop               | Type                            | Default      | Description                                                                    |
-| ------------------ | ------------------------------- | ------------ | ------------------------------------------------------------------------------ |
-| `data`             | `MindMapData \| MindMapData[]`  | _required_   | Tree data (single root or array of roots)                                      |
-| `markdown`         | `string`                        | -            | Markdown list source (overrides `data` when set)                               |
-| `defaultDirection` | `'left' \| 'right' \| 'both'`   | `'both'`     | Initial layout direction                                                       |
-| `theme`            | `'light' \| 'dark' \| 'auto'`   | `'auto'`     | Color theme                                                                    |
-| `locale`           | `string`                        | _auto_       | UI language (auto-detected from browser, or `'zh-CN'`, `'en-US'`, custom)      |
-| `messages`         | `Partial<MindMapMessages>`      | -            | Override any UI text string                                                    |
-| `readonly`         | `boolean`                       | `false`      | Display-only mode (no editing, no creating)                                    |
-| `toolbar`          | `boolean \| ToolbarConfig`      | `true`       | Show/hide zoom, history, search, and tag controls                              |
-| `ai`               | `MindMapAIConfig`               | -            | AI generation configuration (API endpoint, key, model, attachments)            |
-| `selectedNodeId`   | `string \| null`                | -            | Controlled selected node id                                                    |
-| `searchQuery`      | `string`                        | -            | Controlled search query                                                        |
-| `activeTags`       | `string[]`                      | -            | Controlled active tag filters                                                  |
-| `plugins`          | `MindMapPlugin[]`               | `allPlugins` | Plugins to enable for extended syntax                                          |
-| `textEditor`       | `ComponentType`                 | -            | Pass `MindMapTextEditor` to enable text editing mode. Opt-in for tree-shaking. |
-| `onDataChange`     | `(data: MindMapData[]) => void` | -            | Called when the tree is modified by user interaction                           |
-| `onSelectedNodeChange` | `(nodeId: string \| null) => void` | -        | Called when selection changes                                                  |
-| `onSearchChange`   | `(query: string) => void`       | -            | Called when search text changes                                                |
-| `onActiveTagsChange` | `(tags: string[]) => void`    | -            | Called when active tag filters change                                          |
-
-### ToolbarConfig
-
-```ts
-interface ToolbarConfig {
-  zoom?: boolean; // show zoom controls (default: true)
-  history?: boolean; // show undo/redo controls (default: true)
-  search?: boolean; // show search controls (default: true)
-  tags?: boolean; // show tag filter chips (default: true)
-}
-```
-
-### MindMapAIConfig
-
-```ts
-type AIAttachmentType = "text" | "image" | "pdf";
-
-interface MindMapAIConfig {
-  apiUrl: string; // OpenAI-compatible API endpoint
-  apiKey: string; // API key (Bearer token)
-  model: string; // Model name (e.g., "gpt-5")
-  systemPrompt?: string; // Custom system prompt (has a built-in default)
-  attachments?: AIAttachmentType[]; // Allowed attachment types (default: [])
-  maxAttachmentSize?: number; // Per-file byte limit (default: 5MB)
-  headers?: Record<string, string>; // Extra request headers
-  request?: (payload: MindMapAIRequestPayload) => Promise<Response>; // Custom proxy request
-}
-```
-
-| Field          | Type                 | Required | Description                                                                              |
-| -------------- | -------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `apiUrl`       | `string`             | Yes      | OpenAI-compatible chat completions endpoint                                              |
-| `apiKey`       | `string`             | Yes      | API key sent as `Bearer` token                                                           |
-| `model`        | `string`             | Yes      | Model identifier (e.g., `gpt-5`, `deepseek-chat`)                                        |
-| `systemPrompt` | `string`             | No       | Override the built-in mind map generation prompt                                         |
-| `attachments`  | `AIAttachmentType[]` | No       | Enable file uploads: `"text"` (text/\*), `"image"` (image/\*), `"pdf"` (application/pdf) |
-| `maxAttachmentSize` | `number`        | No       | Maximum bytes per uploaded file; defaults to 5 MB                                        |
-| `headers`      | `Record<string, string>` | No  | Extra headers for the default request                                                    |
-| `request`      | `(payload) => Promise<Response>` | No | Custom request adapter, useful for server-side proxy endpoints                           |
-
-### Ref Methods
-
-| Method              | Returns         | Description                            |
-| ------------------- | --------------- | -------------------------------------- |
-| `exportToSVG()`     | `string`        | Returns the mind map as an SVG string  |
-| `exportToPNG()`     | `Promise<Blob>` | Renders a high-DPI PNG blob            |
-| `exportToOutline()` | `string`        | Serializes the tree as a markdown list |
-| `getMarkdown()`     | `string`        | Serializes the tree as markdown        |
-| `getData()`         | `MindMapData[]` | Returns the current tree data          |
-| `setData(data)`     | `void`          | Replaces the tree through editor history and emits `onDataChange` |
-| `setMarkdown(md)`   | `void`          | Parses Markdown, applies valid frontmatter, and emits `onDataChange` |
-| `importMarkdown(md)` | `void`         | Imports Markdown through editor history |
-| `importData(data)`  | `void`          | Imports JSON data through editor history |
-| `selectNode(id)`    | `void`          | Selects a node, or clears selection with `null` |
-| `focusNode(id)`     | `void`          | Selects and pans to a node             |
-| `expandNode(id)`    | `void`          | Expands a folded node                  |
-| `collapseNode(id)`  | `void`          | Marks and collapses a node             |
-| `undo()` / `redo()` | `void`          | Moves through editor history           |
-| `canUndo()` / `canRedo()` | `boolean` | Returns current history availability   |
-| `fitView()`         | `void`          | Resets zoom and pan to fit all nodes   |
-| `setDirection(dir)` | `void`          | Changes the layout direction           |
-
-### MindMapViewer
-
-A lightweight read-only alternative to `MindMap`. Import from `@xiangfa/mindmap/viewer` for the smallest bundle, or from the main entry.
-
-#### MindMapViewerProps
-
-| Prop               | Type                            | Default  | Description                                                               |
-| ------------------ | ------------------------------- | -------- | ------------------------------------------------------------------------- |
-| `data`             | `MindMapData \| MindMapData[]`  | -        | Tree data (single root or array of roots)                                 |
-| `markdown`         | `string`                        | -        | Markdown list source (overrides `data` when set)                          |
-| `defaultDirection` | `'left' \| 'right' \| 'both'`   | `'both'` | Initial layout direction                                                  |
-| `theme`            | `'light' \| 'dark' \| 'auto'`   | `'auto'` | Color theme                                                               |
-| `locale`           | `string`                        | _auto_   | UI language (auto-detected from browser, or `'zh-CN'`, `'en-US'`, custom) |
-| `messages`         | `Partial<MindMapMessages>`      | -        | Override any UI text string                                               |
-| `toolbar`          | `boolean \| ToolbarConfig`      | `true`   | Show/hide zoom controls                                                   |
-| `plugins`          | `MindMapPlugin[]`               | -        | Plugins to enable for extended syntax                                     |
-| `searchQuery`      | `string`                        | -        | Highlights matching nodes                                                 |
-| `activeTags`       | `string[]`                      | -        | Dims nodes outside matching tag branches                                  |
-| `onEvent`          | `(event: MindMapEvent) => void` | -        | Called on zoom, direction change, or node select events                   |
-
-#### MindMapViewerRef Methods
-
-| Method              | Returns         | Description                          |
-| ------------------- | --------------- | ------------------------------------ |
-| `getData()`         | `MindMapData[]` | Returns the current tree data        |
-| `fitView()`         | `void`          | Resets zoom and pan to fit all nodes |
-| `setDirection(dir)` | `void`          | Changes the layout direction         |
-
-### Data Structure
-
-```ts
-interface MindMapData {
-  id: string;
-  text: string;
-  children?: MindMapData[];
-  remark?: string; // multi-line remark
-  taskStatus?: "todo" | "doing" | "done";
-  // Plugin extension fields (populated by corresponding plugins)
-  dottedLine?: boolean; // dotted-line plugin
-  multiLineContent?: string[]; // multi-line plugin
-  tags?: string[]; // tags plugin
-  anchorId?: string; // cross-link plugin
-  crossLinks?: CrossLink[]; // cross-link plugin
-  collapsed?: boolean; // folding plugin
-}
-
-interface CrossLink {
-  targetAnchorId: string;
-  label?: string;
-  dotted?: boolean;
-}
-```
-
-## Keyboard Shortcuts
-
-| Shortcut               | Action                                      |
-| ---------------------- | ------------------------------------------- |
-| `↑` `↓` `←` `→`        | Move selection between nodes                |
-| `Tab`                  | Create a child node under the selected node |
-| `Shift + Enter`        | Create a sibling node after the selected node |
-| `Enter` / `F2`         | Edit the selected node                      |
-| `Delete` / `Backspace` | Delete the selected node                    |
-| `Double-click`         | Edit node text                              |
-| `Cmd/Ctrl + C`         | Copy subtree                                |
-| `Cmd/Ctrl + X`         | Cut subtree                                 |
-| `Cmd/Ctrl + V`         | Paste subtree as child                      |
-| `Cmd/Ctrl + Z`         | Undo visual edit                            |
-| `Cmd/Ctrl + Shift + Z` | Redo visual edit                            |
-| `Escape`               | Close context menu / dialog                 |
-| `Shift + +`            | Zoom in                                     |
-| `Shift + -`            | Zoom out                                    |
-| `Shift + 0`            | Reset view (fit all nodes)                  |
-| `Shift + L`            | Left layout                                 |
-| `Shift + R`            | Right layout                                |
-| `Shift + M`            | Both layout (balanced)                      |
-| Scroll wheel           | Zoom in / out                               |
-| Click + drag on canvas | Pan                                         |
-| Click + drag on node   | Reorder among siblings                      |
-| Right-click            | Open context menu                           |
-
-## Utility Functions
-
-These are also exported for advanced use cases:
-
-```ts
-import {
-  // Markdown parsing
-  parseMarkdownList, // md string → single MindMapData
-  toMarkdownList, // single MindMapData → md string
-  parseMarkdownMultiRoot, // md string → MindMapData[]
-  toMarkdownMultiRoot, // MindMapData[] → md string
-  parseMarkdownWithFrontMatter, // md string → MindMapData[] (with plugin support)
-
-  // Inline markdown
-  parseInlineMarkdown, // text → inline tokens
-  stripInlineMarkdown, // remove markdown formatting from text
-
-  // Export
-  exportMindMapToSVG, // data/markdown → SVG string
-  buildExportSVG, // programmatic SVG generation
-  exportToPNG, // SVG string → PNG Blob
-
-  // i18n
-  resolveMessages, // build a full MindMapMessages object
-  detectLocale, // detect browser locale
-
-  // Plugins
-  allPlugins, // all 7 built-in plugins
-  frontMatterPlugin,
-  dottedLinePlugin,
-  foldingPlugin,
-  multiLinePlugin,
-  tagsPlugin,
-  crossLinkPlugin,
-  latexPlugin,
-
-  // Text Editor
-  MindMapTextEditor, // opt-in text editor component
-
-  // Lightweight Viewer
-  MindMapViewer, // read-only viewer component (also available via @xiangfa/mindmap/viewer)
-
-  // Advanced types
-  type ExportMindMapToSVGOptions,
-  type LayoutNode,
-  type Edge,
-  type MindMapAIRequestPayload,
-  type MindMapAIContentPart,
-} from "@xiangfa/mindmap";
-```
-
-Export without mounting a React component:
-
-```ts
-import { exportMindMapToSVG, allPlugins } from "@xiangfa/mindmap";
-
-const svg = exportMindMapToSVG({
-  markdown,
-  plugins: allPlugins,
-});
-```
-
-By default, `exportMindMapToSVG` exports the full tree, matching edit mode. Pass `readonly: true` to export the visible folded tree used by read-only rendering.
+Frontmatter, task markers, remarks, comments, folding, multiline content, tags, dotted lines, links/images, cross-links, inline formatting, and LaTeX are part of the v0.9 syntax contract. Parser, render, export, and round-trip results are recorded individually in [the requirements matrix](docs/refactor-v0.9.0-requirements.md).
 
 ## Development
 
 ```bash
-git clone https://github.com/u14app/mindmap.git
-cd mindmap
 pnpm install
-pnpm dev        # start dev server
-pnpm build      # type-check and build
-pnpm build:lib  # build as library
-pnpm lint       # run linter
+pnpm test:unit
+pnpm build:lib
+pnpm check:site
+pnpm build:site
+pnpm lint
 ```
 
-## Contributing
-
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a pull request.
-
-## Community Support
-
-You can ask questions or share your thoughts and needs regarding Open MindMap in these communities.
-
-[LinuxDo](https://linux.do)
+The complete validation matrix, including permitted E2E and visual checks, is in [docs/refactor-v0.9.0-requirements.md](docs/refactor-v0.9.0-requirements.md). Use its command, revision, fixture, result, and limitation fields when recording release evidence.
 
 ## License
 
-[Apache-2.0](LICENSE)
+Apache-2.0. See [LICENSE](LICENSE).

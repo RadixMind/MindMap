@@ -1,0 +1,37 @@
+@import "./viewer.css";
+.mm-editor { --mm-toolbar-height: 46px; }
+.mm-context-backdrop { position:fixed; inset:0; z-index:100; }
+.mm-context-menu { position:absolute; display:flex; flex-direction:column; width:212px; max-height:calc(100dvh - 16px); overflow:auto; padding:6px; border:1px solid var(--mm-muted); border-radius:10px; background:var(--mm-background); color:var(--mm-text); box-shadow:0 10px 28px #0003; }
+.mm-context-menu button { min-height:34px; border:0; padding:6px 12px; text-align:left; background:transparent; color:inherit; }
+.mm-context-menu button:hover,.mm-context-menu button:focus-visible { background:color-mix(in srgb,var(--mm-selection) 18%,transparent); outline:2px solid var(--mm-selection); }
+.mm-context-menu button:disabled { opacity:.4; }
+.mm-text-mode { position:absolute; z-index:10; inset:76px 16px 68px; background:var(--mm-background); }
+.mm-text-mode textarea { width:100%; height:100%; resize:none; padding:16px; border:1px solid var(--mm-muted); background:var(--mm-background); color:var(--mm-text); font:14px/1.6 ui-monospace,monospace; }
+.mm-tag-filter { display:flex; align-items:center; gap:5px; color:var(--mm-text); font-size:11px; }
+.mm-tag-filter select { max-height:38px; background:var(--mm-background); color:var(--mm-text); }
+.mm-node-properties { position:absolute; z-index:15; top:80px; left:50%; transform:translateX(-50%); width:min(360px,calc(100% - 32px)); padding:16px; border:1px solid var(--mm-muted); border-radius:12px; background:var(--mm-background); color:var(--mm-text); }
+.mm-node-properties textarea { display:block; width:100%; min-height:100px; margin-block:8px; background:var(--mm-background); color:var(--mm-text); }
+.mm-editor-toolbar { position: absolute; z-index: 12; top: 15px; left: 50%; max-width: calc(100% - 30px); min-height: var(--mm-toolbar-height); transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 5px; border: 1px solid color-mix(in srgb, var(--mm-muted) 23%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--mm-background) 89%, transparent); backdrop-filter: blur(20px) saturate(130%); box-shadow: 0 14px 40px rgba(0,0,0,.17); }
+.mm-editor-toolbar__group,.mm-editor-direction,.mm-feature-toolbar { display: flex; align-items: center; gap: 3px; }
+.mm-editor-toolbar__group,.mm-editor-direction { padding-right: 7px; border-right: 1px solid color-mix(in srgb,var(--mm-muted) 18%,transparent); }
+.mm-editor-toolbar button,.mm-feature-toolbar button { height: 34px; padding: 0 10px; border: 0; border-radius: 9px; background: transparent; color: var(--mm-muted); cursor: pointer; font-size: 10px; font-weight: 650; white-space: nowrap; }
+.mm-editor-toolbar button:hover:not(:disabled),.mm-feature-toolbar button:hover:not(:disabled) { background: color-mix(in srgb,var(--mm-muted) 11%,transparent); color: var(--mm-text); }
+.mm-editor-toolbar button:focus-visible,.mm-feature-toolbar button:focus-visible { outline: 2px solid var(--mm-selection); outline-offset: 1px; }
+.mm-editor-toolbar button:disabled,.mm-feature-toolbar button:disabled { opacity: .35; cursor: not-allowed; }
+.mm-editor-direction button { text-transform: capitalize; padding-inline: 8px; }
+.mm-editor-direction button.is-active { color: var(--mm-text); background: color-mix(in srgb,var(--mm-selection) 13%,transparent); }
+.mm-feature-toolbar { gap: 5px; }
+.mm-feature { position: relative; }
+.mm-editor-input-object { overflow: visible; }
+.mm-editor-input { width: 100%; height: 100%; min-height: 38px; padding: 0 12px; border: 2px solid var(--mm-selection); border-radius: 10px; outline: 0; background: var(--mm-background); color: var(--mm-text); font: 600 13px var(--mm-font); text-align: center; box-shadow: 0 12px 35px rgba(0,0,0,.2), 0 0 0 4px color-mix(in srgb,var(--mm-selection) 13%,transparent); }
+.mm-feature-overlay { position: absolute; z-index: 14; inset: 0; pointer-events: none; }
+.mm-feature-overlay > * { pointer-events: auto; }
+.mm-feature-bottom { position: absolute; z-index: 13; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(720px, calc(100% - 154px)); }
+.mm-editor .mm-viewport-controls { bottom: 18px; }
+@media (max-width: 780px) {
+  .mm-editor-toolbar { top: 8px; left: 8px; right: 8px; max-width: none; transform: none; overflow-x: auto; justify-content: flex-start; }
+  .mm-editor-toolbar__group button { font-size: 0; width: 34px; padding: 0; }
+  .mm-editor-toolbar__group button::first-letter { font-size: 12px; }
+  .mm-feature-bottom { width: calc(100% - 24px); bottom: 12px; }
+  .mm-editor .mm-viewport-controls { bottom: 78px; left: 12px; }
+}

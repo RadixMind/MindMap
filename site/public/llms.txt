@@ -1,0 +1,30 @@
+# Open MindMap
+
+Open MindMap is a modular React mind map runtime designed for AI-generated and human-edited knowledge structures.
+Current site and package target: v0.9.0.
+
+## Primary resources
+- Documentation: https://mindmap.u14.app/docs/
+- Getting started: https://mindmap.u14.app/docs/getting-started/
+- Markdown syntax: https://mindmap.u14.app/docs/syntax/
+- AI generation: https://mindmap.u14.app/docs/ai/
+- Custom styling: https://mindmap.u14.app/docs/styling/
+- API reference: https://mindmap.u14.app/docs/api/
+- Playground: https://mindmap.u14.app/playground/
+- Source: https://github.com/u14app/mindmap
+- npm: @xiangfa/mindmap
+
+## Runtime entries
+- @xiangfa/mindmap/core - parser, serializer, layout, patch controller, streaming, standalone SVG generation
+- @xiangfa/mindmap/static - non-interactive React SVG rendering
+- @xiangfa/mindmap/viewer - read-only pan, zoom, fit, selection, and accessible semantic tree
+- @xiangfa/mindmap/editor - base editing surface and feature host
+
+## Optional features
+history, search, import, export, markdown-editor, and ai are independent subpath exports with independent stylesheets.
+
+## Documentation map
+- Syntax guide covers outline roots, indentation, inline formatting, links and images, remarks, comments, task markers, and extensions.
+- AI guide covers host-owned generators, delta streaming, cancellation, attachments, provider requests, and rollback behavior.
+- Styling guide covers theme modes, semantic theme tokens, runtime classes, and SVG or PNG export.
+- API reference covers public entrypoints, surface props, refs, controller and stream methods, events, shortcuts, and utilities.
