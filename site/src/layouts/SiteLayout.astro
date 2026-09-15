@@ -1,196 +1,179 @@
 ---
+import '../styles/tailwind.css'
 import '../styles/global.css'
+import sitePackage from '../../package.json'
 
 interface Props {
   title?: string
   description?: string
   image?: string
   pageClass?: string
+  active?: 'home' | 'docs'
+  chrome?: boolean
 }
 
 const {
-  title = 'Open MindMap - Modular React Mind Map Runtime',
-  description = 'Streaming Markdown visualized as thought. A modular React mind map runtime with static, viewer, editor, and opt-in features.',
-  image = '/og.svg',
+  title = 'Open MindMap - Interactive mind maps for React',
+  description = 'A modular React and TypeScript runtime for deterministic SVG mind maps, interactive viewing, editing, and Markdown streaming.',
+  image = '/screenshot.png',
   pageClass = '',
+  active,
+  chrome = true,
 } = Astro.props
+
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).toString()
 const ogImage = new URL(image, Astro.site ?? Astro.url.origin).toString()
+const getStartedHref = active === 'docs' ? '/docs/#getting-started' : '/live/'
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Open MindMap',
+  description,
+  url: 'https://mindmap.u14.app',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Any',
+  softwareVersion: sitePackage.version,
+  license: 'https://www.apache.org/licenses/LICENSE-2.0',
+  codeRepository: 'https://github.com/u14app/mindmap',
+  programmingLanguage: ['TypeScript', 'React'],
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+}
 ---
 <!doctype html>
-<html lang="en" data-theme="auto">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="img-src 'self' data:; object-src 'none'; base-uri 'self'" />
+    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://open-mindmap-ai.u14.app; img-src 'self' data:; object-src 'none'; base-uri 'self'" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="theme-color" content="#f4f7fb" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1117" />
     <meta name="description" content={description} />
+    <meta name="keywords" content="mindmap, mind map, React, TypeScript, SVG, Markdown, AI streaming, Astro" />
+    <meta name="author" content="U14App" />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/logo.png" type="image/png" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="Open MindMap" />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <title>{title}</title>
   </head>
-  <body class={pageClass}>
+  <body class:list={['bg-white text-on-surface dark:bg-[#0f1117] dark:text-slate-300', pageClass]}>
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <div class="scroll-sentinel" data-scroll-sentinel aria-hidden="true"></div>
-    <header class="site-header" data-site-header>
-      <div class="site-header__inner shell shell--wide">
-        <a class="brand" href="/" aria-label="Open MindMap home">
-          <svg class="brand__mark" viewBox="0 0 44 44" aria-hidden="true">
-            <rect x="1" y="1" width="42" height="42" rx="13" fill="currentColor" opacity=".08" />
-            <circle cx="12" cy="22" r="3" fill="currentColor" />
-            <circle cx="32" cy="12" r="3" fill="currentColor" />
-            <circle cx="32" cy="32" r="3" fill="currentColor" />
-            <path d="M15 22c8 0 8-10 14-10M15 22c8 0 8 10 14 10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
-          </svg>
-          <span class="brand__name">Open MindMap</span>
-          <span class="brand__version">v0.9.0</span>
-        </a>
-        <nav class="site-nav" aria-label="Primary navigation">
-          <a href="/docs/">Docs</a>
-          <a href="/#runtime">Runtime</a>
-          <a href="/#benchmarks">Benchmarks</a>
-          <a href="/playground/">Playground</a>
-        </nav>
-        <div class="site-actions">
-          <a class="icon-link" href="https://github.com/u14app/mindmap" target="_blank" rel="noreferrer" aria-label="GitHub repository">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56v-2.23c-3.22.7-3.9-1.36-3.9-1.36-.52-1.34-1.28-1.69-1.28-1.69-1.05-.72.08-.71.08-.71 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.57-.29-5.27-1.28-5.27-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18A10.97 10.97 0 0 1 12 6.12c.98 0 1.95.13 2.86.38 2.2-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.07.79 2.16v3.25c0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .7Z" /></svg>
-          </a>
-          <button class="theme-toggle" type="button" data-theme-toggle aria-label="Use dark theme" aria-pressed="false">
-            <span aria-hidden="true">◐</span>
-            <span data-theme-label>Theme</span>
-          </button>
-          <a class="button button--small button--light" href="/playground/">Open playground</a>
+    {chrome && (
+      <nav class="legacy-site-nav fixed top-0 z-50 w-full border-b border-surface-container-high/50 bg-white/80 transition-all duration-300 dark:border-slate-700/50 dark:bg-slate-900/80" data-site-nav>
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+          <div class="flex min-w-0 items-center">
+            <a href="/" class="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-900 no-underline dark:text-white" aria-label="Open MindMap home">
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white"><img src="/logo.png" class="scale-150" width="28" height="28" alt="" /></span>
+              <span class="hidden sm:block">Open MindMap</span>
+            </a>
+            <div class="ml-5 flex items-center gap-4 text-[13px] font-medium sm:ml-10 sm:gap-8">
+              <a class:list={[active === 'home' ? 'text-slate-900 dark:text-white' : 'text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white']} aria-current={active === 'home' ? 'page' : undefined} href="/">Home</a>
+              <a class:list={[active === 'docs' ? 'text-slate-900 dark:text-white' : 'text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white']} aria-current={active === 'docs' ? 'page' : undefined} href="/docs/">Docs</a>
+              <a class="text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" href="https://github.com/u14app/mindmap" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
+          <a href={getStartedHref} class="ml-3 hidden shrink-0 rounded-full bg-primary px-4 py-1.5 text-[13px] font-semibold text-white transition-all hover:scale-105 hover:bg-primary/90 md:flex">Get Started</a>
         </div>
-        <details class="mobile-menu">
-          <summary aria-label="Open navigation"><span></span><span></span></summary>
-          <nav>
-            <a href="/docs/">Docs</a>
-            <a href="/#runtime">Runtime</a>
-            <a href="/#benchmarks">Benchmarks</a>
-            <a href="/playground/">Playground</a>
-            <a href="https://github.com/u14app/mindmap">GitHub</a>
-            <button class="theme-toggle theme-toggle--mobile" type="button" data-theme-toggle aria-label="Use dark theme" aria-pressed="false">
-              <span aria-hidden="true">◐</span>
-              <span data-theme-label>Theme</span>
-            </button>
-          </nav>
-        </details>
-      </div>
-    </header>
-    <main id="main-content">
-      <slot />
-    </main>
-    <footer class="site-footer">
-      <div class="shell site-footer__inner">
-        <div>
-          <a class="brand brand--footer" href="/">
-            <svg class="brand__mark" viewBox="0 0 44 44" aria-hidden="true">
-              <circle cx="12" cy="22" r="3" fill="currentColor" />
-              <circle cx="32" cy="12" r="3" fill="currentColor" />
-              <circle cx="32" cy="32" r="3" fill="currentColor" />
-              <path d="M15 22c8 0 8-10 14-10M15 22c8 0 8 10 14 10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
-            </svg>
-            <span class="brand__name">Open MindMap</span>
-          </a>
-          <p>Streaming Markdown, visualized as thought.</p>
+      </nav>
+    )}
+
+    <slot />
+
+    {chrome && (
+      <footer class="w-full border-t border-slate-100 bg-white px-4 py-8 dark:border-slate-800 dark:bg-slate-900 md:px-8">
+        <div class="mx-auto max-w-7xl">
+          <div class="mb-12 grid grid-cols-2 gap-8 md:mb-16 md:grid-cols-4 md:gap-12">
+            <div class="col-span-2 md:col-span-1">
+              <a href="/" class="mb-6 block text-lg font-bold tracking-tight text-slate-900 dark:text-white">Open MindMap</a>
+              <p class="text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">Open source &amp; community driven.<br />Built for the modern web.</p>
+            </div>
+            <div>
+              <h5 class="mb-6 text-[11px] font-bold uppercase tracking-widest text-slate-400">Engineering</h5>
+              <ul class="space-y-4 text-[13px] font-semibold text-slate-600 dark:text-slate-400">
+                <li><a class="transition-colors hover:text-primary" href="/docs/">Documentation</a></li>
+                <li><a class="transition-colors hover:text-primary" href="/docs/#api-reference">API Reference</a></li>
+                <li><a class="transition-colors hover:text-primary" href="/docs/#getting-started">React SDK</a></li>
+                <li><a class="transition-colors hover:text-primary" href="/docs/#extended-syntax">Extension Guide</a></li>
+              </ul>
+            </div>
+            <div>
+              <h5 class="mb-6 text-[11px] font-bold uppercase tracking-widest text-slate-400">Community</h5>
+              <ul class="space-y-4 text-[13px] font-semibold text-slate-600 dark:text-slate-400">
+                <li><a class="transition-colors hover:text-primary" href="https://github.com/u14app/mindmap" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                <li><a class="transition-colors hover:text-primary" href="https://www.npmjs.com/package/@xiangfa/mindmap" target="_blank" rel="noopener noreferrer">npm</a></li>
+                <li><a class="transition-colors hover:text-primary" href="https://github.com/u14app/mindmap/blob/HEAD/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+                <li><a class="transition-colors hover:text-primary" href="/live/">Live demo</a></li>
+              </ul>
+            </div>
+            <div>
+              <h5 class="mb-6 text-[11px] font-bold uppercase tracking-widest text-slate-400">Legal</h5>
+              <ul class="space-y-4 text-[13px] font-semibold text-slate-600 dark:text-slate-400">
+                <li><a class="transition-colors hover:text-primary" href="https://github.com/u14app/mindmap/blob/HEAD/LICENSE" target="_blank" rel="noopener noreferrer">Apache-2.0 License</a></li>
+                <li><a class="transition-colors hover:text-primary" href="https://github.com/u14app/mindmap" target="_blank" rel="noopener noreferrer">Source code</a></li>
+                <li><a class="transition-colors hover:text-primary" href="/docs/#input-boundaries">Security boundaries</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="flex flex-col items-center justify-between border-t border-slate-100 pt-6 dark:border-slate-800 md:flex-row">
+            <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">&copy; 2026 Open MindMap. Open Source.</p>
+          </div>
         </div>
-        <div class="site-footer__links">
-          <div><strong>Product</strong><a href="/playground/">Playground</a><a href="/docs/">Documentation</a></div>
-          <div><strong>Runtime</strong><a href="/docs/#runtime">Public entrypoints</a><a href="/docs/#architecture">Architecture</a><a href="/docs/#features">Features</a></div>
-          <div><strong>Project</strong><a href="https://github.com/u14app/mindmap">GitHub</a><a href="https://www.npmjs.com/package/@xiangfa/mindmap">npm</a></div>
-        </div>
-      </div>
-      <div class="shell site-footer__meta"><span>Apache-2.0</span><span>Designed for AI-native interfaces.</span></div>
-    </footer>
+      </footer>
+    )}
+
     <script is:inline>
-      const header = document.querySelector('[data-site-header]');
-      const sentinel = document.querySelector('[data-scroll-sentinel]');
-      if (header && sentinel && 'IntersectionObserver' in window) {
-        const observer = new IntersectionObserver(([entry]) => {
-          header.classList.toggle('is-scrolled', !entry.isIntersecting);
-        });
-        observer.observe(sentinel);
-      }
+      const nav = document.querySelector('[data-site-nav]');
+      const updateNav = () => nav?.classList.toggle('is-scrolled', window.scrollY > 10);
+      updateNav();
+      window.addEventListener('scroll', updateNav, { passive: true });
 
-      const themeKey = 'open-mindmap-theme';
-      const themeChangeEvent = 'open-mindmap:theme-change';
-      const root = document.documentElement;
-      const themeButtons = document.querySelectorAll('[data-theme-toggle]');
-      const themeLabels = document.querySelectorAll('[data-theme-label]');
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
-      let storedTheme = null;
-      try { storedTheme = localStorage.getItem(themeKey); } catch {}
-      if (storedTheme === 'light' || storedTheme === 'dark') {
-        root.dataset.theme = storedTheme;
-        window.dispatchEvent(new CustomEvent(themeChangeEvent, { detail: storedTheme }));
-      }
+      const legacyDocsAnchors = new Map([
+        ['syntax', 'basic-syntax'],
+        ['ai', 'ai-generation'],
+        ['styling', 'custom-styling'],
+        ['api', 'api-reference'],
+      ]);
+      const redirectLegacyHash = () => {
+        const legacyHash = window.location.hash;
+        if (window.location.pathname !== '/' || !legacyHash.startsWith('#/')) return;
 
-      const syncThemeControls = () => {
-        const dark = root.dataset.theme === 'dark' || (root.dataset.theme === 'auto' && systemTheme.matches);
-        themeButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String(dark));
-          button.setAttribute('aria-label', dark ? 'Use light theme' : 'Use dark theme');
-        });
-        themeLabels.forEach((label) => { label.textContent = dark ? 'Light' : 'Dark'; });
-      };
-      syncThemeControls();
-      systemTheme.addEventListener?.('change', syncThemeControls);
-      themeButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const currentDark = root.dataset.theme === 'dark' || (root.dataset.theme === 'auto' && systemTheme.matches);
-          const nextTheme = currentDark ? 'light' : 'dark';
-          root.dataset.theme = nextTheme;
-          try { localStorage.setItem(themeKey, nextTheme); } catch {}
-          window.dispatchEvent(new CustomEvent(themeChangeEvent, { detail: nextTheme }));
-          syncThemeControls();
-        });
-      });
-
-      const legacyHash = window.location.hash;
-      if (window.location.pathname === '/' && legacyHash.startsWith('#/')) {
-        const route = legacyHash.slice(2);
-        const [path, ...hashParts] = route.split('#');
-        let hash = hashParts.join('#');
-        let target = '/';
-        if (path === 'docs' || path.startsWith('docs/')) {
-          const docsPath = path.slice('docs'.length).replace(/^\/+/, '');
-          target = docsPath ? `/docs/${docsPath.replace(/\/+$/, '')}/` : '/docs/';
-          if (path === 'docs') {
-            const legacyDocsAliases = new Map([
-              ['getting-started', { target: '/docs/getting-started/', hash: '' }],
-              ['basic-syntax', { target: '/docs/syntax/', hash: 'basic-syntax' }],
-              ['text-formatting', { target: '/docs/syntax/', hash: 'text-formatting' }],
-              ['links-images', { target: '/docs/syntax/', hash: 'links-images' }],
-              ['remarks', { target: '/docs/syntax/', hash: 'remarks' }],
-              ['comments', { target: '/docs/syntax/', hash: 'comments' }],
-              ['task-status', { target: '/docs/syntax/', hash: 'task-status' }],
-              ['extended-syntax', { target: '/docs/syntax/', hash: 'extended-syntax' }],
-              ['ai-generation', { target: '/docs/ai/', hash: 'ai-generation' }],
-              ['custom-styling', { target: '/docs/styling/', hash: 'custom-styling' }],
-              ['api-reference', { target: '/docs/api/', hash: 'api-reference' }],
-              ['keyboard-shortcuts', { target: '/docs/api/', hash: 'keyboard-shortcuts' }],
-              ['utility-functions', { target: '/docs/api/', hash: 'utility-functions' }],
-            ]);
-            const alias = legacyDocsAliases.get(hash);
-            if (alias) {
-              target = alias.target;
-              hash = alias.hash;
-            }
-          }
+        if (legacyHash.startsWith('#/live')) {
+          window.location.replace('/live/');
+          return;
         }
-        if (path === 'live' || path.startsWith('live/')) target = '/playground/';
-        window.location.replace(`${target}${hash ? `#${hash}` : ''}`);
+
+        if (legacyHash.startsWith('#/docs')) {
+          const legacyAnchor = legacyHash.slice('#/docs'.length).replace(/^[#\/]+/, '');
+          const anchor = legacyDocsAnchors.get(legacyAnchor) ?? legacyAnchor;
+          window.location.replace(`/docs/${anchor ? `#${anchor}` : ''}`);
+        }
+      };
+      redirectLegacyHash();
+      window.addEventListener('hashchange', redirectLegacyHash);
+
+      const animated = document.querySelectorAll('[data-animate]');
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+        animated.forEach(element => element.classList.add('animate-fade-in-up'));
+      } else {
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('animate-fade-in-up');
+            observer.unobserve(entry.target);
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        animated.forEach(element => observer.observe(element));
       }
     </script>
   </body>

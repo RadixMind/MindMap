@@ -2,5 +2,7 @@
 import SiteLayout from '../layouts/SiteLayout.astro'
 ---
 <SiteLayout title="Page not found - Open MindMap">
-  <section class="not-found"><div><strong>404</strong><h1>This branch has no node.</h1><p>The requested page does not exist in the current map.</p><a class="button button--primary" href="/">Return to the root</a></div></section>
+  <main id="main-content" class="flex min-h-[70vh] items-center justify-center px-6 pb-20 pt-32 text-center">
+    <div><strong class="text-sm uppercase tracking-[.24em] text-primary">404</strong><h1 class="my-5 text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Page not found.</h1><p class="mb-8 text-slate-500 dark:text-slate-400">This page may have moved. Find your way back to Open MindMap.</p><a class="inline-flex rounded-full bg-primary px-6 py-3 font-semibold text-white" href="/">Back to home</a></div>
+  </main>
 </SiteLayout>

@@ -357,6 +357,22 @@ describe('React controller adapter', () => {
     }
   })
 
+  it('owns wheel zoom with a non-passive listener so page scrolling cannot chain through the surface', async () => {
+    const addEventListener = vi.spyOn(SVGSVGElement.prototype, 'addEventListener')
+    await act(async () => { root.render(<MindMapViewer markdown="Root" autoFit="never" />) })
+
+    const wheelRegistrations = addEventListener.mock.calls.filter(([type]) => type === 'wheel')
+    expect(wheelRegistrations).toContainEqual([
+      'wheel',
+      expect.any(Function),
+      expect.objectContaining({ passive: false }),
+    ])
+
+    const event = new WheelEvent('wheel', { bubbles: true, cancelable: true, clientX: 40, clientY: 40, deltaY: 120 })
+    await act(async () => { container.querySelector('svg')!.dispatchEvent(event) })
+    expect(event.defaultPrevented).toBe(true)
+  })
+
   it('moves down by one sibling and cancels editing before blur on Escape', async () => {
     const ref = createRef<MindMapEditorRef>()
     await act(async () => { root.render(<MindMapEditor ref={ref} markdown={'Root\n- A\n- B\n- C'} autoFit="never" />) })

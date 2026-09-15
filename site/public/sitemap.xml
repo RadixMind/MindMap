@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://mindmap.u14.app/</loc></url>
-  <url><loc>https://mindmap.u14.app/playground/</loc></url>
   <url><loc>https://mindmap.u14.app/docs/</loc></url>
-  <url><loc>https://mindmap.u14.app/docs/getting-started/</loc></url>
-  <url><loc>https://mindmap.u14.app/docs/syntax/</loc></url>
-  <url><loc>https://mindmap.u14.app/docs/ai/</loc></url>
-  <url><loc>https://mindmap.u14.app/docs/styling/</loc></url>
-  <url><loc>https://mindmap.u14.app/docs/api/</loc></url>
+  <url><loc>https://mindmap.u14.app/live/</loc></url>
 </urlset>

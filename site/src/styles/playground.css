@@ -1,0 +1,116 @@
+@import '@xiangfa/mindmap/styles/editor.css';
+@import '@xiangfa/mindmap/styles/features/history.css';
+@import '@xiangfa/mindmap/styles/features/search.css';
+@import '@xiangfa/mindmap/styles/features/import.css';
+@import '@xiangfa/mindmap/styles/features/export.css';
+
+.live-page-body {
+  overflow: hidden;
+}
+
+.live-page {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.legacy-playground { min-height: 0; }
+
+.legacy-playground--fullscreen,
+.legacy-playground--fullscreen > .legacy-playground__grid {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.editor-scroll { overscroll-behavior-y: contain; }
+
+.legacy-markdown-editor {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  resize: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 16px 24px;
+  color: #334155;
+  font: inherit;
+  line-height: inherit;
+  outline: none;
+  box-shadow: none;
+}
+
+.legacy-markdown-editor:focus {
+  outline: none;
+  box-shadow: inset 3px 0 0 rgb(0 122 255 / 35%);
+}
+
+.demo-mindmap-container,
+.demo-mindmap-container > .mm-editor,
+.demo-mindmap-container > .mm-editor > .mm-surface {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+.demo-mindmap-container > .mm-editor {
+  background: transparent;
+}
+
+.legacy-playground .mm-surface {
+  --mm-surface-background: transparent;
+}
+
+.legacy-playground .mm-editor-toolbar {
+  left: 12px;
+  right: 12px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin-inline: auto;
+  transform: none;
+  overflow-x: auto;
+  background: rgb(255 255 255 / 92%);
+  backdrop-filter: blur(12px);
+}
+
+.legacy-ai-disclosure {
+  margin-top: 8px;
+  color: #94a3b8;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.legacy-ai-error {
+  margin-top: 7px;
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .legacy-markdown-editor { color: #cbd5e1; }
+  .legacy-playground .mm-editor-toolbar { background: rgb(30 41 59 / 92%); }
+  .legacy-ai-error { color: #f87171; }
+}
+
+@media (min-width: 1024px) {
+  .legacy-playground:not(.legacy-playground--fullscreen) > .legacy-playground__grid { min-height: 720px; }
+
+  .demo-mindmap-container,
+  .demo-mindmap-container > .mm-editor,
+  .demo-mindmap-container > .mm-editor > .mm-surface { min-height: 500px; }
+}
+
+@media (max-width: 1023px) {
+  .legacy-playground--fullscreen { overflow: auto; }
+  .legacy-playground--fullscreen > .legacy-playground__grid { height: auto; min-height: 100%; }
+  .legacy-playground--fullscreen .legacy-editor-panel { min-height: 42vh; }
+  .legacy-playground--fullscreen .legacy-map-panel { min-height: 58vh; }
+}
+
+@media (max-width: 767px) {
+  .legacy-markdown-editor { padding: 14px 16px; }
+  .legacy-playground .mm-editor-toolbar { top: 8px; }
+  .legacy-playground .mm-editor-toolbar button { min-height: 40px; }
+}

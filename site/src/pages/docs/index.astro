@@ -1,220 +1,44 @@
 ---
+import { ChevronUp, Menu, X } from 'lucide-react'
+import DocsContent from '../../components/DocsContent'
+import DocsSidebar from '../../components/DocsSidebar.astro'
 import SiteLayout from '../../layouts/SiteLayout.astro'
 ---
-<SiteLayout title="Documentation - Open MindMap" description="Open MindMap v0.9.0 documentation for the core, static, viewer, editor, and feature entrypoints.">
-  <div class="shell docs-layout">
-    <aside class="docs-sidebar" aria-label="Documentation navigation">
-      <span>Overview</span>
-      <a class="is-active" href="/docs/">Introduction</a>
-      <a href="/docs/getting-started/">Getting started</a>
-      <span>Runtime</span>
-      <a href="#runtime">Public entrypoints</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#features">Feature modules</a>
-      <span>Markdown</span>
-      <a href="/docs/syntax/#basic-syntax">Basic syntax</a>
-      <a href="/docs/syntax/#extended-syntax">Extended syntax</a>
-      <a href="/docs/styling/#custom-styling">Custom styling</a>
-      <span>Guides</span>
-      <a href="/docs/ai/#ai-generation">AI generation</a>
-      <span>Reference</span>
-      <a href="/docs/api/#api-reference">API surface</a>
-      <a href="/docs/api/#keyboard-shortcuts">Keyboard shortcuts</a>
-      <a href="#migration">Migration</a>
-    </aside>
+<SiteLayout
+  active="docs"
+  pageClass="docs-page"
+  title="Documentation - Open MindMap v0.9.0"
+  description="Complete Open MindMap v0.9.0 documentation for Markdown syntax, React surfaces, Features, Extensions, AI streaming, styling, and public APIs."
+>
+  <main id="main-content" class="min-h-screen bg-white dark:bg-slate-900" data-docs-page>
+    <div class="mx-auto flex max-w-7xl px-4 pt-[68px] md:px-6">
+      <aside class="docs-sidebar-scroll sticky top-[68px] hidden h-[calc(100vh-68px)] shrink-0 overflow-y-auto py-8 pr-8 lg:block">
+        <DocsSidebar />
+      </aside>
 
-    <article class="docs-content">
-      <span class="eyebrow">Documentation</span>
-      <h1>One runtime, every surface.</h1>
-      <p>Open MindMap turns Markdown into an interactive SVG tree. v0.9.0 separates parsing, layout, rendering, viewport interaction, editing, and optional features so each product surface can ship a deliberate dependency graph.</p>
-      <div class="docs-callout">Start with <code>MindMapViewer</code> for read-only output. Use <code>MindMapEditor</code> when users need to change the tree. In v0.9.0 the root <code>MindMap</code> export is an alias for the full editor.</div>
-
-      <h2 id="runtime">Public entrypoints</h2>
-      <p>Each entrypoint is public and has a stable package path. Use the root export for the editor alias, or choose an explicit subpath when you need a smaller or headless dependency graph. Do not import files from the package source tree.</p>
-      <div class="api-grid">
-        <div class="api-card"><strong><code>@xiangfa/mindmap/core</code></strong><p>Parser, serializer, layout, patches, streaming, and standalone SVG helpers. No React or DOM.</p></div>
-        <div class="api-card"><strong><code>@xiangfa/mindmap/static</code></strong><p>Deterministic SVG output for reports, documentation, previews, and server-rendered pages.</p></div>
-        <div class="api-card"><strong><code>@xiangfa/mindmap/viewer</code></strong><p>Read-only pan, zoom, fit-to-view, selection, and an accessible semantic tree.</p></div>
-        <div class="api-card"><strong><code>@xiangfa/mindmap/editor</code></strong><p>The editing loop with commands and extension slots. Add history, search, import, export, Markdown, or AI explicitly.</p></div>
+      <div class="min-w-0 flex-1 py-8 lg:pl-4">
+        <button class="mb-7 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 lg:hidden" type="button" data-docs-menu aria-controls="docs-mobile-drawer" aria-expanded="false">
+          <Menu size={18} aria-hidden="true" /> Browse sections
+        </button>
+        <article class="docs-content max-w-3xl">
+          <DocsContent />
+        </article>
       </div>
+    </div>
 
-      <h2 id="architecture">Architecture</h2>
-      <p>The core document controller is the source of truth for document changes, transactions, subscriptions, and history. React adapters own rendering and lifecycle. Layout is a projection of the document, while pan and zoom stay in the viewport state.</p>
-      <div class="code-block"><pre><code>input or stream
-  -&gt; document controller
-  -&gt; immutable patches and transaction
-  -&gt; layout projection
-  -&gt; static, viewer, or editor surface</code></pre></div>
-      <p>The stream controller accepts delta chunks and coalesces them before a render frame. A string result from an AI generator is treated as a complete replacement. Cancellation and failed generation leave the document at its previous committed state.</p>
+    <div class="docs-overlay fixed inset-0 z-[60] lg:hidden" data-docs-overlay hidden>
+      <aside id="docs-mobile-drawer" class="docs-sidebar-scroll absolute inset-y-0 left-0 w-72 overflow-y-auto bg-white p-6 pt-5 shadow-2xl dark:bg-slate-900" aria-label="Mobile documentation navigation">
+        <div class="mb-6 flex items-center justify-between">
+          <strong class="text-sm text-slate-900 dark:text-white">Documentation</strong>
+          <button class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" type="button" data-docs-close aria-label="Close documentation navigation"><X size={20} aria-hidden="true" /></button>
+        </div>
+        <DocsSidebar />
+      </aside>
+    </div>
 
-      <h2 id="features">Feature modules</h2>
-      <p>Feature modules are opt-in additions to the editor. They share the editor controller and do not create a second document or history stack.</p>
-      <div class="api-grid">
-        <div class="api-card"><strong>history</strong><p>Undo and redo for committed document transactions.</p></div>
-        <div class="api-card"><strong>search</strong><p>Find nodes, move between matches, and focus the selected branch.</p></div>
-        <div class="api-card"><strong>import and export</strong><p>JSON, Markdown, SVG, PNG, and outline workflows.</p></div>
-        <div class="api-card"><strong>markdown-editor</strong><p>Optional text mode synchronized through the document controller.</p></div>
-        <div class="api-card"><strong>ai</strong><p>Generator-agnostic streaming composer with cancellation and rollback.</p></div>
-        <div class="api-card"><strong>extensions</strong><p>Dotted edges, folding, multiline nodes, tags, cross-links, frontmatter, and LaTeX.</p></div>
-      </div>
-      <div class="code-block"><pre><code>import &#123; MindMapEditor &#125; from '@xiangfa/mindmap/editor'
-import &#123; historyFeature &#125; from '@xiangfa/mindmap/features/history'
-import &#123; searchFeature &#125; from '@xiangfa/mindmap/features/search'
-import '@xiangfa/mindmap/styles/editor.css'
-import '@xiangfa/mindmap/styles/features/history.css'
-import '@xiangfa/mindmap/styles/features/search.css'
-
-const features = [historyFeature(), searchFeature()]
-
-&lt;MindMapEditor features=&#123;features&#125; /&gt;</code></pre></div>
-      <p>Define Feature and Extension arrays at module scope, or memoize them with <code>useMemo</code>, to keep their identities stable while the editor renders.</p>
-
-      <h2 id="syntax">Basic Markdown syntax</h2>
-      <p>Lines without a list marker become roots. Indentation defines parent and child relationships. Separate independent roots with a blank line.</p>
-      <div class="code-block"><pre><code>Machine Learning
-- Supervised Learning
-  - Classification
-  - Regression
-- Unsupervised Learning
-  - Clustering
-
-Application Areas
-- Natural Language Processing
-- Computer Vision</code></pre></div>
-
-      <h3>Inline formatting</h3>
-      <p>Node labels support bold, italic, strikethrough, inline code, highlights, and links.</p>
-      <div class="code-block"><pre><code>Product plan
-- **Important** decision
-- *Open question*
-- ~~Deprecated~~ approach
-- `component-name`
-- ==Key concept==
-- [Project brief](https://example.com)</code></pre></div>
-
-      <h3>Links and images</h3>
-      <p>Use <code>[label](url)</code> for a node link and <code>![alt](url)</code> for an image token. URL schemes are filtered by the runtime, and remote HTTP(S) images are denied by default. Authorize intended origins with <code>remoteImagePolicy</code>; rejected images remain readable as alt text. PNG export requires remote images to be embedded through an explicitly authorized <code>imageResolver</code>.</p>
-      <div class="code-block"><pre><code>Resources
-- [Project brief](https://example.com/brief)
-- ![Architecture diagram](https://example.com/architecture.png)</code></pre></div>
-
-      <h3>Task status</h3>
-      <p>Use the familiar task markers for todo, in-progress, and completed nodes.</p>
-      <div class="code-block"><pre><code>Release plan
-- [x] Parser review
-- [-] Browser verification
-- [ ] Documentation update</code></pre></div>
-
-      <h3>Comments and remarks</h3>
-      <p>Lines beginning with <code>%%</code> stay in the text editor and are not rendered. Lines beginning with <code>&gt;</code> become remarks attached to the preceding node and can be shown as supporting detail.</p>
-      <div class="code-block"><pre><code>%% Internal note
-Research
-- Interviews
-  &gt; Capture the questions that changed the direction
-- Prototype</code></pre></div>
-
-      <h2 id="extended-syntax">Extended syntax</h2>
-      <p>Extensions are enabled through the public extension entrypoint. Each syntax marker maps to one focused behavior. Add the matching extension to the <code>extensions</code> prop when it is not part of your shared extension set.</p>
-      <div class="api-grid">
-        <div class="api-card"><strong>Dotted edges</strong><p>Use <code>-.</code> for a dotted parent-child connection.</p></div>
-        <div class="api-card"><strong>Multiline nodes</strong><p>Use <code>| text</code> to append visible lines to the preceding node.</p></div>
-        <div class="api-card"><strong>Tags</strong><p>Add <code>#tag</code> labels for search and filtering.</p></div>
-        <div class="api-card"><strong>Folding</strong><p>Use <code>+</code> instead of <code>-</code> to collapse a branch initially.</p></div>
-        <div class="api-card"><strong>Cross-links</strong><p>Define <code>&#123;#id&#125;</code> and connect with <code>-&gt; &#123;#id&#125;</code>.</p></div>
-        <div class="api-card"><strong>LaTeX</strong><p>With optional KaTeX installed, use <code>$...$</code> or <code>$$...$$</code>.</p></div>
-      </div>
-      <div class="code-block"><pre><code>System architecture
-- Frontend &#123;#frontend&#125;
-  - API call -&gt; &#123;#gateway&#125; "HTTP"
-- Backend
-  - API Gateway &#123;#gateway&#125;
-    | Handles authenticated requests
-  + Data layer
-    - Warehouse</code></pre></div>
-      <p>Frontmatter can set document-wide options before the first root:</p>
-      <div class="code-block"><pre><code>---
-direction: right
-theme: auto
----
-
-Project
-- Research
-- Delivery</code></pre></div>
-
-      <h2 id="styling">Custom styling</h2>
-      <p>Override semantic CSS variables on <code>.mm-static</code> or <code>.mm-surface</code>. Static SVG output includes resolved colors and accessibility labels. Runtime classes such as <code>.mm-node</code> and <code>.mm-edge</code> apply to mounted surfaces.</p>
-      <div class="code-block"><pre><code>.mm-static &#123;
-  --mm-background: #f0f4f8;
-  --mm-root: #1a73e8;
-  --mm-text: #1a1a2e;
-  --mm-selection: #087eaa;
-&#125;
-
-.mm-edge &#123;
-  stroke-width: 2.5;
-&#125;</code></pre></div>
-      <p>Useful mounted selectors include <code>.mm-node</code>, <code>.mm-node-shape</code>, <code>.mm-node-label</code>, <code>.mm-node-accent</code>, <code>.mm-edge</code>, <code>.mm-fold-control</code>, and <code>.mm-task</code>.</p>
-
-      <h2 id="api">API surface</h2>
-      <p>The root editor accepts a document, data, or Markdown input, plus direction, theme, toolbar, viewport policy, extensions, feature modules, and change callbacks.</p>
-      <div class="code-block"><pre><code>import &#123; MindMapEditor &#125; from '@xiangfa/mindmap/editor'
-import &#123; basicMindMapExtensions &#125; from '@xiangfa/mindmap/extensions'
-
-const extensions = basicMindMapExtensions()
-
-&lt;MindMapEditor
-  markdown=&#123;markdown&#125;
-  extensions=&#123;extensions&#125;
-  theme="auto"
-  direction="both"
-  onMarkdownChange=&#123;setMarkdown&#125;
-/&gt;</code></pre></div>
-      <p>Viewer refs expose <code>fitView()</code>, <code>focusNode()</code>, <code>selectNode()</code>, <code>setDirection()</code>, <code>getViewport()</code>, and <code>getDocument()</code>. Editor refs additionally expose <code>getMarkdown()</code>, <code>getController()</code>, node commands, and editing controls. History is provided by the history feature through the shared controller. Consult the generated declaration files for the exact v0.9.0 type signatures.</p>
-
-      <h2 id="ai">AI generation</h2>
-      <p>Provide a generator through the AI feature. Async iterables yield delta chunks. A complete string replaces the document once. Keep provider credentials on a server-side proxy in production.</p>
-      <div class="code-block"><pre><code>import &#123; aiFeature &#125; from '@xiangfa/mindmap/features/ai'
-
-const ai = aiFeature(&#123;
-  generate: async function* (input) &#123;
-    yield 'Launch plan\n'
-    yield '- Research\n'
-    yield '  - Interview users\n'
-  &#125;,
-&#125;)</code></pre></div>
-      <div class="docs-callout">The browser demo uses a local generator only. It does not send prompts, files, or credentials to a provider. See the <a href="/docs/ai/">AI guide</a> for host-owned provider requests.</div>
-
-      <h2 id="shortcuts">Keyboard shortcuts</h2>
-      <p>Shortcuts apply to the active editor surface. Text inputs keep their normal editing behavior.</p>
-      <div class="api-grid">
-        <div class="api-card"><strong>Navigation</strong><p>Arrow keys move selection. <code>Tab</code> adds a child. <code>Shift + Enter</code> adds a sibling.</p></div>
-        <div class="api-card"><strong>Editing</strong><p><code>Enter</code> or <code>F2</code> edits. <code>Delete</code> removes. <code>Escape</code> cancels.</p></div>
-        <div class="api-card"><strong>History</strong><p><code>Cmd/Ctrl + Z</code> undoes. <code>Cmd/Ctrl + Shift + Z</code> redoes.</p></div>
-        <div class="api-card"><strong>Viewport</strong><p><code>Shift + 0</code> fits. <code>Shift + L</code>, <code>R</code>, or <code>M</code> changes direction.</p></div>
-      </div>
-
-      <h2 id="migration">Migration from the legacy entry</h2>
-      <p>Existing integrations can continue to import <code>MindMap</code>, the root alias for <code>MindMapEditor</code>. For read-only surfaces, move to the viewer entry first. Add feature modules only when the product needs them.</p>
-      <div class="code-block"><pre><code>// full editor through the public runtime entry
-import &#123; MindMapEditor &#125; from '@xiangfa/mindmap/editor'
-import '@xiangfa/mindmap/styles/editor.css'
-
-// focused read-only surface
-import &#123; MindMapViewer &#125; from '@xiangfa/mindmap/viewer'
-import '@xiangfa/mindmap/styles/viewer.css'</code></pre></div>
-      <p>The v0.9.0 package no longer documents private source imports or the retired cognitive fallback. Keep URLs stable by linking to <code>/docs/</code>, <code>/docs/getting-started/</code>, and <code>/playground/</code>. Legacy <code>#/docs</code> and <code>#/live</code> links are redirected by the site shell.</p>
-    </article>
-
-    <aside class="docs-toc" aria-label="On this page">
-      <span>On this page</span>
-      <a href="#runtime">Public entrypoints</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#syntax">Markdown syntax</a>
-      <a href="#extended-syntax">Extended syntax</a>
-      <a href="#styling">Custom styling</a>
-      <a href="#api">API surface</a>
-      <a href="#ai">AI generation</a>
-      <a href="#migration">Migration</a>
-    </aside>
-  </div>
+    <button class="docs-back-to-top fixed bottom-6 right-6 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg hover:bg-primary dark:bg-slate-700" type="button" data-docs-top aria-label="Back to top" hidden><ChevronUp size={20} aria-hidden="true" /></button>
+  </main>
+  <script>
+    import '../../scripts/docs'
+  </script>
 </SiteLayout>

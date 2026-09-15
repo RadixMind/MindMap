@@ -10,7 +10,6 @@ import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
-  type WheelEvent,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
 import type { MindMapDocument, MindMapLayout, MindMapLayoutNode, MindMapThemeTokens } from '../core/types'
@@ -93,6 +92,7 @@ export const MindMapSurface = forwardRef<MindMapSurfaceRef, MindMapSurfaceProps>
   children,
 }, forwardedRef) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const viewportElementRef = useRef<SVGSVGElement>(null)
   const [viewport, setViewportState] = useState<MindMapViewport>({ x: 0, y: 0, zoom: 1 })
   const viewportRef = useRef(viewport)
   const viewportListener = useRef(onViewportChange)
@@ -196,20 +196,26 @@ export const MindMapSurface = forwardRef<MindMapSurfaceRef, MindMapSurfaceProps>
     return () => observer.disconnect()
   }, [autoFit, fitView])
 
-  const handleWheel = useCallback((event: WheelEvent<SVGSVGElement>) => {
-    event.preventDefault()
-    const svg = event.currentTarget
-    const rect = svg.getBoundingClientRect()
-    const pointX = event.clientX - rect.left
-    const pointY = event.clientY - rect.top
-    const current = viewportRef.current
-    const factor = Math.exp(-event.deltaY * .0013)
-    const zoom = clamp(current.zoom * factor, .12, 5)
-    setViewport({
-      x: pointX - (pointX - current.x) * (zoom / current.zoom),
-      y: pointY - (pointY - current.y) * (zoom / current.zoom),
-      zoom,
-    })
+  useEffect(() => {
+    const svg = viewportElementRef.current
+    if (!svg) return
+    const handleWheel = (event: globalThis.WheelEvent) => {
+      event.preventDefault()
+      const rect = svg.getBoundingClientRect()
+      const pointX = event.clientX - rect.left
+      const pointY = event.clientY - rect.top
+      const current = viewportRef.current
+      const deltaScale = event.deltaMode === event.DOM_DELTA_LINE ? 16 : event.deltaMode === event.DOM_DELTA_PAGE ? svg.clientHeight : 1
+      const factor = Math.exp(-event.deltaY * deltaScale * .0013)
+      const zoom = clamp(current.zoom * factor, .12, 5)
+      setViewport({
+        x: pointX - (pointX - current.x) * (zoom / current.zoom),
+        y: pointY - (pointY - current.y) * (zoom / current.zoom),
+        zoom,
+      })
+    }
+    svg.addEventListener('wheel', handleWheel, { passive: false })
+    return () => svg.removeEventListener('wheel', handleWheel)
   }, [setViewport])
 
   const handlePointerDown = useCallback((event: ReactPointerEvent<SVGSVGElement>) => {
@@ -290,13 +296,13 @@ export const MindMapSurface = forwardRef<MindMapSurfaceRef, MindMapSurfaceProps>
       tabIndex={-1}
     >
       <svg
+        ref={viewportElementRef}
         className="mm-viewport"
         width="100%"
         height="100%"
         role={selectable ? 'tree' : 'img'}
         aria-label={ariaLabel}
         tabIndex={selectable ? layout.nodes.length ? -1 : 0 : undefined}
-        onWheel={handleWheel}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={finishPointer}

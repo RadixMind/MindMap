@@ -1,15 +1,3 @@
 ---
-import SiteLayout from '../layouts/SiteLayout.astro'
-import PlaygroundIsland from '../components/PlaygroundIsland'
+return Astro.redirect('/live/', 301)
 ---
-<SiteLayout title="Playground - Open MindMap" description="Compose and test the Open MindMap modular editor runtime." pageClass="playground-body">
-  <section class="playground-page">
-    <div class="playground-shell">
-      <div class="playground-heading">
-        <div><span class="eyebrow">Live laboratory</span><h1>Compose the complete editor.</h1></div>
-        <p>This page deliberately enables every optional feature. Production applications can import each module independently and keep the rest outside their dependency graph.</p>
-      </div>
-      <PlaygroundIsland client:load />
-    </div>
-  </section>
-</SiteLayout>

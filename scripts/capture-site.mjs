@@ -9,8 +9,8 @@ const output = resolve(root, "artifacts/screenshots");
 mkdirSync(output, { recursive: true });
 const pages = [
   ["home", "/"],
-  ["playground", "/playground/"],
   ["docs", "/docs/"],
+  ["live", "/live/"],
 ];
 const viewports = [
   ["desktop", { width: 1440, height: 1050 }],
@@ -23,23 +23,27 @@ const browser = await chromium.launch({ headless: true });
 async function waitForStableState(page, pageName, theme, reducedMotion) {
   await page.waitForSelector("main#main-content", { state: "attached" });
   if (pageName === "home") {
-    await page.waitForSelector(".hero-runtime .mm-surface [data-mm-node]", { state: "visible" });
-    const control = page.locator(".hero-runtime__control").first();
-    if (await control.count() && !(await control.isDisabled()) && (await control.getAttribute("aria-pressed")) !== "true") {
-      await control.click();
-    }
+    const demo = page.locator("#demo");
+    await demo.scrollIntoViewIfNeeded();
+    await demo.locator(".legacy-playground .mm-surface [data-mm-node]:visible").first().waitFor();
   }
-  if (pageName === "playground") await page.waitForSelector(".playground-app .mm-surface [data-mm-node]", { state: "visible" });
-  const runtimeSelector = pageName === "home" ? ".hero-runtime .mm-surface" : pageName === "playground" ? ".playground-app .mm-surface" : null;
+  if (pageName === "live") await page.waitForSelector(".legacy-playground .mm-surface [data-mm-node]", { state: "visible" });
+  const runtimeSelector = pageName === "live"
+    ? ".legacy-playground .mm-surface"
+    : pageName === "home"
+      ? "#demo .legacy-playground .mm-surface"
+      : null;
   if (runtimeSelector) {
-    await page.waitForFunction(({ selector, expectedTheme }) => {
+    const expectedBackground = theme === "dark" ? "#171a23" : "#ffffff";
+    await page.waitForFunction(({ selector, expectedBackground }) => {
       const surface = document.querySelector(selector);
-      return surface?.getAttribute("data-mm-theme") === expectedTheme;
-    }, { selector: runtimeSelector, expectedTheme: theme }, { timeout: 10_000 });
+      return surface && getComputedStyle(surface).getPropertyValue("--mm-background").trim().toLowerCase() === expectedBackground;
+    }, { selector: runtimeSelector, expectedBackground }, { timeout: 10_000 });
   }
   return {
-    runtimeTheme: runtimeSelector ? await page.locator(runtimeSelector).getAttribute("data-mm-theme") : null,
-    heroPaused: pageName === "home" ? await page.locator(".hero-runtime__control").getAttribute("aria-pressed") === "true" : null,
+    runtimeBackground: runtimeSelector
+      ? await page.locator(runtimeSelector).evaluate((surface) => getComputedStyle(surface).getPropertyValue("--mm-background").trim())
+      : null,
     reducedMotion: await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches),
     requestedReducedMotion: reducedMotion,
   };
@@ -52,16 +56,12 @@ try {
         const reducedMotion = viewportName === "mobile";
         const page = await browser.newPage({ viewport });
         await page.emulateMedia({ colorScheme: theme, reducedMotion: reducedMotion ? "reduce" : "no-preference" });
-        await page.addInitScript(() => {
-          try { localStorage.removeItem("open-mindmap-theme"); } catch { /* storage may be unavailable */ }
-        });
         try {
           const response = await page.goto(`${baseUrl}${path}`, { waitUntil: "networkidle" });
-          await page.evaluate(() => { document.documentElement.dataset.theme = "auto"; });
           const stableState = await waitForStableState(page, pageName, theme, reducedMotion);
           const filename = `${pageName}-${viewportName}-${theme}${reducedMotion ? "-reduced" : ""}.png`;
           const outputPath = resolve(output, filename);
-          await page.screenshot({ path: outputPath, fullPage: pageName !== "playground" });
+          await page.screenshot({ path: outputPath, fullPage: pageName !== "live" });
           captures.push({
             filename,
             page: pageName,

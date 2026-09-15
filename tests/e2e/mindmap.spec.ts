@@ -2,9 +2,9 @@ import { promises as fs } from 'node:fs'
 import { expect, test, type Page } from '@playwright/test'
 
 async function openPlayground(page: Page): Promise<void> {
-  await page.goto('/playground/')
-  await expect(page.getByRole('heading', { name: 'Compose the complete editor.' })).toBeVisible()
-  const tree = page.getByRole('tree', { name: 'Editable mind map' })
+  await page.goto('/live/')
+  await expect(page.locator('.legacy-playground--fullscreen')).toBeVisible()
+  const tree = page.getByRole('tree', { name: 'Editable Open MindMap demo' })
   await expect(tree).toBeVisible()
   await expect(page.locator('astro-island').filter({ has: tree })).not.toHaveAttribute('ssr', '')
 }
@@ -42,7 +42,7 @@ async function dragNode(page: Page, sourceName: string, targetName: string, plac
 
 async function cancelNodeDrag(page: Page, sourceName: string): Promise<void> {
   const source = page.getByRole('treeitem', { name: sourceName, exact: true })
-  const tree = page.getByRole('tree', { name: 'Editable mind map' })
+  const tree = page.getByRole('tree', { name: 'Editable Open MindMap demo' })
   await expect(source).toBeVisible()
   const sourceBox = await source.boundingBox()
   if (!sourceBox) throw new Error('Unable to resolve the SVG node bounds for pointer cancellation.')
@@ -81,61 +81,38 @@ async function downloadFromExport(page: Page, label: string): Promise<{ filename
 }
 
 test.describe('public site routes', () => {
-  test('home renders the real streaming Viewer surface', async ({ page }) => {
+  test('home renders the complete legacy page around the real v0.9 Editor', async ({ page }) => {
     await page.goto('/')
 
-    const viewer = page.getByRole('tree', { name: 'Streaming Open MindMap demo' })
-    await expect(viewer).toBeVisible()
-    await expect(viewer.getByRole('treeitem', { name: 'Open MindMap', exact: true })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Open playground', exact: true }).first()).toHaveAttribute('href', '/playground/')
+    const editor = page.getByRole('tree', { name: 'Editable Open MindMap demo' })
+    await expect(editor).toBeVisible()
+    await expect(editor.getByRole('treeitem', { name: 'Open MindMap', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Everything you need.' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Extend with Extensions.' })).toBeVisible()
   })
 
-  test('Viewer keeps keyboard navigation and folding while ignoring editor commands', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await page.goto('/')
-
-    const viewer = page.getByRole('tree', { name: 'Streaming Open MindMap demo' })
-    await expect(viewer.getByRole('treeitem', { name: 'Static SVG', exact: true })).toBeVisible({ timeout: 15_000 })
-
-    const root = viewer.getByRole('treeitem', { name: 'Open MindMap', exact: true })
-    const branch = viewer.getByRole('treeitem', { name: 'Modular runtime', exact: true })
-    await root.click()
-    await page.keyboard.press('ArrowRight')
-    await expect(branch).toHaveAttribute('aria-selected', 'true')
-
-    await page.keyboard.press('Space')
-    await expect(branch).toHaveAttribute('aria-expanded', 'false')
-    await expect(viewer.getByRole('treeitem', { name: 'Static SVG', exact: true })).toHaveCount(0)
-    await page.keyboard.press('Space')
-    await expect(branch).toHaveAttribute('aria-expanded', 'true')
-    await expect(viewer.getByRole('treeitem', { name: 'Static SVG', exact: true })).toBeVisible()
-
-    await page.keyboard.press('Enter')
-    await page.keyboard.press('Tab')
-    await page.keyboard.press('Delete')
-    await expect(viewer.getByRole('textbox')).toHaveCount(0)
-    await expect(viewer.getByRole('treeitem', { name: 'Open MindMap', exact: true })).toBeVisible()
-  })
-
-  test('documentation route exposes the migrated runtime and feature documentation', async ({ page }) => {
+  test('documentation route exposes all legacy sections with v0.9 content', async ({ page }) => {
     await page.goto('/docs/')
 
     await expect(page).toHaveTitle(/Documentation - Open MindMap/)
-    await expect(page.getByRole('heading', { name: 'One runtime, every surface.' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Public entrypoints' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Feature modules' })).toBeVisible()
-    await expect(page.getByText('@xiangfa/mindmap/core', { exact: true })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Getting started' })).toHaveAttribute('href', '/docs/getting-started/')
+    await expect(page.getByRole('heading', { name: 'Getting Started' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Extended Syntax' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'API Reference' })).toBeAttached()
+    await expect(page.getByText('@xiangfa/mindmap/core', { exact: true }).first()).toBeVisible()
+    await expect(page.locator('[data-docs-section]')).toHaveCount(13)
   })
 
   test('legacy hash routes redirect to their Astro destinations', async ({ page }) => {
     await page.goto('/#/docs')
     await expect(page).toHaveURL(/\/docs\/$/)
-    await expect(page.getByRole('heading', { name: 'One runtime, every surface.' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Getting Started' })).toBeVisible()
 
     await page.goto('/#/live')
-    await expect(page).toHaveURL(/\/playground\/$/)
-    await expect(page.getByRole('heading', { name: 'Compose the complete editor.' })).toBeVisible()
+    await expect(page).toHaveURL(/\/live\/$/)
+    await expect(page.locator('.legacy-playground--fullscreen')).toBeVisible()
+
+    await page.goto('/playground/')
+    await expect(page).toHaveURL(/\/live\/$/)
   })
 })
 
@@ -145,10 +122,10 @@ test.describe('playground editor', () => {
 
     const search = page.getByRole('search')
     const input = search.getByRole('textbox', { name: 'Search', exact: true })
-    await input.fill('Modular')
+    await input.fill('Markdown')
     await input.press('Enter')
     await expect(search).toContainText('1/1')
-    await expect(page.getByRole('treeitem', { name: 'Modular runtime', exact: true })).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByRole('treeitem', { name: 'Markdown Syntax', exact: true })).toHaveAttribute('aria-selected', 'true')
   })
 
   test('rejects invalid import data and imports valid Markdown through the dialog', async ({ page }) => {
@@ -222,7 +199,7 @@ test.describe('playground editor', () => {
   test('edits a node and Escape restores the pre-edit label', async ({ page }) => {
     await openPlayground(page)
 
-    const tree = page.getByRole('tree', { name: 'Editable mind map' })
+    const tree = page.getByRole('tree', { name: 'Editable Open MindMap demo' })
     await tree.focus()
     await page.keyboard.press('ArrowRight')
     await page.keyboard.press('Enter')
@@ -232,21 +209,21 @@ test.describe('playground editor', () => {
     await editor.fill('Edited without commit')
     await page.keyboard.press('Escape')
     await expect(editor).toBeHidden()
-    await expect(page.getByRole('treeitem', { name: 'Open MindMap v0.9.0', exact: true })).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: 'Open MindMap', exact: true })).toBeVisible()
     await expect(page.getByRole('treeitem', { name: 'Edited without commit', exact: true })).toHaveCount(0)
   })
 
   test('moves a sibling with the keyboard and restores it with history', async ({ page }) => {
     await openPlayground(page)
 
-    const tree = page.getByRole('tree', { name: 'Editable mind map' })
+    const tree = page.getByRole('tree', { name: 'Editable Open MindMap demo' })
     const before = await treeLabels(page)
-    const firstSiblingIndex = before.indexOf('Static renders deterministic SVG')
-    const secondSiblingIndex = before.indexOf('Viewer adds viewport navigation')
+    const firstSiblingIndex = before.indexOf('Installation')
+    const secondSiblingIndex = before.indexOf('Quick Setup')
     expect(firstSiblingIndex).toBeGreaterThan(-1)
     expect(secondSiblingIndex).toBeGreaterThan(firstSiblingIndex)
 
-    const source = page.getByRole('treeitem', { name: 'Static renders deterministic SVG', exact: true })
+    const source = page.getByRole('treeitem', { name: 'Installation', exact: true })
     await source.click()
     await expect(source).toHaveAttribute('aria-selected', 'true')
     await tree.focus()
@@ -254,13 +231,13 @@ test.describe('playground editor', () => {
     await page.keyboard.press('Alt+ArrowDown')
     await expect.poll(async () => {
       const labels = await treeLabels(page)
-      return [labels.indexOf('Static renders deterministic SVG'), labels.indexOf('Viewer adds viewport navigation')]
+      return [labels.indexOf('Installation'), labels.indexOf('Quick Setup')]
     }).toEqual([secondSiblingIndex, firstSiblingIndex])
 
     await page.keyboard.press(process.platform === 'darwin' ? 'Meta+z' : 'Control+z')
     await expect.poll(async () => {
       const labels = await treeLabels(page)
-      return [labels.indexOf('Static renders deterministic SVG'), labels.indexOf('Viewer adds viewport navigation')]
+      return [labels.indexOf('Installation'), labels.indexOf('Quick Setup')]
     }).toEqual([firstSiblingIndex, secondSiblingIndex])
   })
 
@@ -268,8 +245,8 @@ test.describe('playground editor', () => {
     await openPlayground(page)
 
     const before = await treeLabels(page)
-    const expectedAfter = moveLabelAfter(before, 'Static renders deterministic SVG', 'Viewer adds viewport navigation')
-    await dragNode(page, 'Static renders deterministic SVG', 'Viewer adds viewport navigation', 'after')
+    const expectedAfter = moveLabelAfter(before, 'Installation', 'Quick Setup')
+    await dragNode(page, 'Installation', 'Quick Setup', 'after')
     await expect.poll(() => treeLabels(page)).toEqual(expectedAfter)
 
     const undo = page.getByRole('button', { name: 'Undo', exact: true })
@@ -286,10 +263,10 @@ test.describe('playground editor', () => {
     await openPlayground(page)
 
     const before = await treeLabels(page)
-    const expectedAfter = moveLabelAfter(before, 'Static renders deterministic SVG', 'Layout preserves the viewport')
-    await dragNode(page, 'Static renders deterministic SVG', 'AI-native workflow', 'child')
+    const expectedAfter = moveLabelAfter(before, 'Installation', 'Extension System')
+    await dragNode(page, 'Installation', 'Core Features', 'child')
     await expect.poll(() => treeLabels(page)).toEqual(expectedAfter)
-    await expect(page.getByRole('treeitem', { name: 'Static renders deterministic SVG', exact: true })).toHaveAttribute('aria-level', '3')
+    await expect(page.getByRole('treeitem', { name: 'Installation', exact: true })).toHaveAttribute('aria-level', '3')
 
     const undo = page.getByRole('button', { name: 'Undo', exact: true })
     const redo = page.getByRole('button', { name: 'Redo', exact: true })
@@ -306,7 +283,7 @@ test.describe('playground editor', () => {
 
     const before = await treeLabels(page)
     await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeDisabled()
-    await cancelNodeDrag(page, 'Static renders deterministic SVG')
+    await cancelNodeDrag(page, 'Installation')
     await expect.poll(() => treeLabels(page)).toEqual(before)
     await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeDisabled()
   })
@@ -314,68 +291,52 @@ test.describe('playground editor', () => {
   test('folds and unfolds a branch without losing its semantic tree items', async ({ page }) => {
     await openPlayground(page)
 
-    const branch = page.getByRole('treeitem', { name: 'Modular runtime', exact: true })
+    const branch = page.getByRole('treeitem', { name: 'Getting Started', exact: true })
     await expect(branch).toHaveAttribute('aria-expanded', 'true')
     await branch.getByRole('button', { name: 'Collapse node' }).click()
     await expect(branch).toHaveAttribute('aria-expanded', 'false')
-    await expect(page.getByRole('treeitem', { name: 'Static renders deterministic SVG', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('treeitem', { name: 'Installation', exact: true })).toHaveCount(0)
 
     await branch.getByRole('button', { name: 'Expand node' }).click()
     await expect(branch).toHaveAttribute('aria-expanded', 'true')
-    await expect(page.getByRole('treeitem', { name: 'Static renders deterministic SVG', exact: true })).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: 'Installation', exact: true })).toBeVisible()
   })
 
-  test('runs the local deterministic AI generator as one committed document update', async ({ page }) => {
+  test('adapts the public plain-text AI stream as one committed document update', async ({ page }) => {
+    await page.route('https://open-mindmap-ai.u14.app/api/mindmap**', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'text/plain', body: '<think>private</think>```markdown\nRelease plan\n- Validate\n- Ship\n```' })
+    })
     await openPlayground(page)
 
-    const prompt = page.getByRole('textbox', { name: /generate a mind map/i })
+    const prompt = page.getByRole('textbox', { name: 'AI mind map prompt' })
     await prompt.fill('Release plan')
-    await page.getByRole('button', { name: 'Generate', exact: true }).click()
-    await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Generate mind map', exact: true }).click()
     await expect(page.getByRole('treeitem', { name: 'Release plan', exact: true })).toBeVisible({ timeout: 15_000 })
-    await expect(page.getByRole('button', { name: 'Generate', exact: true })).toBeVisible()
-    await expect(page.getByRole('treeitem', { name: 'Open MindMap v0.9.0', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Generate mind map', exact: true })).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: 'Open MindMap', exact: true })).toHaveCount(0)
 
     const undo = page.getByRole('button', { name: 'Undo', exact: true })
     await expect(undo).toBeEnabled()
     await undo.click()
-    await expect(page.getByRole('treeitem', { name: 'Open MindMap v0.9.0', exact: true })).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: 'Open MindMap', exact: true })).toBeVisible()
     await expect(page.getByRole('treeitem', { name: 'Release plan', exact: true })).toHaveCount(0)
     await expect(undo).toBeDisabled()
   })
 
-  test('cancels AI generation, rolls back, and suppresses late chunks from the cancelled run', async ({ page }) => {
-    await openPlayground(page)
-
-    const before = await treeLabels(page)
-    const prompt = page.getByRole('textbox', { name: /generate a mind map/i })
-    const generate = page.getByRole('button', { name: 'Generate', exact: true })
-    await prompt.fill('Cancel generation')
-    await generate.click()
-    const stop = page.getByRole('button', { name: 'Stop', exact: true })
-    await expect(stop).toBeVisible()
-    await stop.click()
-    await expect(generate).toBeVisible()
-    await expect.poll(() => treeLabels(page)).toEqual(before)
-
-    await prompt.fill('Second generation')
-    await generate.click()
-    await expect(page.getByRole('treeitem', { name: 'Second generation', exact: true })).toBeVisible({ timeout: 15_000 })
-    await expect(generate).toBeVisible()
-    await expect(page.getByRole('treeitem', { name: 'Cancel generation', exact: true })).toHaveCount(0)
-  })
-
   test('shows provider failure and keeps the previous document committed', async ({ page }) => {
+    await page.route('https://open-mindmap-ai.u14.app/api/mindmap**', async (route) => {
+      await route.fulfill({ status: 503, contentType: 'text/plain', body: 'Unavailable' })
+    })
     await openPlayground(page)
 
     const before = await treeLabels(page)
-    const prompt = page.getByRole('textbox', { name: /generate a mind map/i })
-    await prompt.fill('Simulate provider failure')
-    await page.getByRole('button', { name: 'Generate', exact: true }).click()
-    await expect(page.getByRole('alert')).toHaveText(/Generation failed/i)
-    await expect(page.getByRole('button', { name: 'Generate', exact: true })).toBeVisible()
+    const prompt = page.getByRole('textbox', { name: 'AI mind map prompt' })
+    await prompt.fill('Provider failure')
+    await page.getByRole('button', { name: 'Generate mind map', exact: true }).click()
+    await expect(page.getByRole('alert')).toHaveText('AI request failed (503).')
+    await expect(page.getByRole('button', { name: 'Generate mind map', exact: true })).toBeVisible()
     await expect.poll(() => treeLabels(page)).toEqual(before)
-    await expect(page.getByRole('treeitem', { name: 'Simulate provider failure', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('treeitem', { name: 'Provider failure', exact: true })).toHaveCount(0)
   })
 
   test('downloads a standalone SVG from the export feature', async ({ page }) => {
@@ -403,8 +364,8 @@ test.describe('playground editor', () => {
     const markdownDownload = await downloadFromExport(page, 'Export as Markdown')
     expect(markdownDownload.filename).toBe('mindmap.md')
     const markdown = await fs.readFile(markdownDownload.path, 'utf8')
-    expect(markdown).toContain('Open MindMap v0.9.0')
-    expect(markdown).toContain('Modular runtime')
+    expect(markdown).toContain('Open MindMap')
+    expect(markdown).toContain('Getting Started')
 
     const jsonDownload = await downloadFromExport(page, 'Export JSON')
     expect(jsonDownload.filename).toBe('mindmap.json')
@@ -415,41 +376,32 @@ test.describe('playground editor', () => {
     await importContent(page, 'Markdown', 'Temporary root\n- Temporary child')
     await expect(page.getByRole('treeitem', { name: 'Temporary root', exact: true })).toBeVisible()
     await importContent(page, 'Markdown', markdown)
-    await expect(page.getByRole('treeitem', { name: 'Open MindMap v0.9.0', exact: true })).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: 'Open MindMap', exact: true })).toBeVisible()
     await expect(page.getByRole('treeitem', { name: 'Temporary root', exact: true })).toHaveCount(0)
 
     await importContent(page, 'Markdown', 'Temporary root\n- Temporary child')
     await importContent(page, 'JSON', json)
-    await expect(page.getByRole('treeitem', { name: 'Open MindMap v0.9.0', exact: true })).toBeVisible()
+    await expect(page.getByRole('treeitem', { name: 'Open MindMap', exact: true })).toBeVisible()
     await expect(page.getByRole('treeitem', { name: 'Temporary root', exact: true })).toHaveCount(0)
   })
 })
 
 test.describe('site controls and responsive layout', () => {
-  test('toggles the site theme and persists the accessible state', async ({ page }) => {
-    await page.emulateMedia({ colorScheme: 'light' })
-    await page.goto('/')
-
-    const toggle = page.getByRole('button', { name: 'Use dark theme' }).first()
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
-    await toggle.click()
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
-    await expect(page.getByRole('button', { name: 'Use light theme' }).first()).toHaveAttribute('aria-pressed', 'true')
-
-    await page.reload()
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
-    await expect(page.getByRole('button', { name: 'Use light theme' }).first()).toHaveAttribute('aria-pressed', 'true')
+  test('follows the system color scheme in the page and runtime', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/live/')
+    const surface = page.locator('.mm-surface')
+    await expect(surface).toBeVisible()
+    expect(await surface.evaluate((element) => getComputedStyle(element).getPropertyValue('--mm-background').trim().toLowerCase())).toBe('#171a23')
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toContain('dark')
   })
 
-  test('opens the mobile navigation without horizontal overflow', async ({ page }) => {
+  test('keeps the legacy mobile page within the viewport', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
 
-    const navigation = page.locator('details').filter({ has: page.locator('summary[aria-label="Open navigation"]') })
-    await navigation.locator('summary[aria-label="Open navigation"]').click()
-    await expect(navigation).toHaveAttribute('open', '')
-    await expect(navigation.getByRole('link', { name: 'Docs', exact: true })).toBeVisible()
-    await expect(navigation.getByRole('link', { name: 'Playground', exact: true })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Docs', exact: true }).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /AI-Native/ })).toBeVisible()
 
     const overflow = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,

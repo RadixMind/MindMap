@@ -9,7 +9,7 @@ This is the source-backed closure record for the v0.9.0 refactor. It covers the 
 - The public graph is root, `core`, `static`, `viewer`, `editor`, `features/*`, `extensions/*`, and layered styles. Every JavaScript entry is built as ESM and CJS with declarations.
 - Existing product capabilities were migrated: Markdown and JSON input, multiple roots, layout directions, task state, remarks and comments, folding, multiline content, tags, links and images, cross-links, optional LaTeX, search, import/export, history, pointer and keyboard editing, i18n, themes, and AI streaming.
 - A successful AI generation creates one undo step. Cancellation and failure roll back. A host replacement invalidates the old stream and late chunks cannot overwrite it.
-- The Astro Cognitive Field site replaces the legacy Vite demo and carries the documentation, Playground, old hash-route mapping, responsive navigation, light/dark themes, and reduced-motion behavior.
+- The Astro site replaces the legacy Vite shell while faithfully restoring the v0.7.1 page structure. It carries the single-page documentation, shared Playground and Live editor, old hash-route mapping, system light/dark themes, and reduced-motion behavior.
 - No Git commit, npm publish, site deployment, or output-size budget gate is part of this work.
 
 ## Architecture before and after
@@ -47,7 +47,7 @@ The temporary architecture review requested for the refactor is `/tmp/architectu
 | `src/components/MindMap/index.ts` | Restored as the package root | Re-exports the v0.9 Editor contract and shared public API. |
 | `src/cognitive-runtime/` and fallback CSS | Removed | No source, build entry, package export, or packed artifact remains. |
 | Old `MindMap.tsx`, viewer, components, hooks, plugins, utils, types, and Vite demo | Removed after behavior migration | `verify:boundaries` rejects any retired source root or reference. |
-| Legacy `index.html`, `src/App*`, `src/pages/`, and `public/` demo assets | Removed | The Astro site owns the active site and assets. |
+| Legacy `index.html`, `src/App*`, and `src/pages/` Vite shell | Removed after migration | The Astro site owns the active routes; the original `logo.png` and `screenshot.png` are retained under `site/public/`. |
 | Supplied `dist/`, site output, logs, screenshots, and verification files | Excluded as implementation input | Library/site output and evidence are rebuilt from the repository source. |
 | `site/` | Migrated and reconciled | Astro pages use the real v0.9 runtime, current examples, route aliases, and shared site styles. |
 
@@ -84,9 +84,9 @@ The temporary architecture review requested for the refactor is `/tmp/architectu
 | R25 | P1 | Centralized URL parsing and attribute emission. Links allow the documented safe classes; remote images require explicit host authorization and otherwise render alt text. Raster data URLs are format/size bounded. | `core/url.ts`, `inline.ts`, `svg.ts`, runtime renderers; compatibility, security-boundary, portable, and zero-request E2E tests. | Closed |
 | R26 | P1 | Derives and checks the full manifest/entry matrix, including every Feature, Extension, ESM/CJS build, declaration, and CSS target. | `vite.config.ts`, `build-manifest.mjs`, `verify-boundaries.mjs`, `verify-pack.mjs`. | Closed |
 | R27 | P1 | Removed stale v0.8, legacy aggregate, cognitive metric, and nonexistent-doc claims; generated metrics now describe only current entries. | Active READMEs/docs/site source and generated bundle manifest; content/link checks. | Closed |
-| R28 | P1 | Added focused Astro pages for getting started, syntax, API, AI, and styling; preserved old docs/live hashes and migration-critical anchors. | `site/src/pages/docs/*`, layout/navigation helpers, redirects; docs-route and legacy-route E2E. | Closed |
+| R28 | P1 | Consolidated the 13 historical chapters into `/docs/`, redirected the former focused pages to their anchors, and preserved old docs/live hashes. | `site/src/pages/docs/*`, `site/src/components/DocsContent.tsx`, layout/navigation helpers, redirects, and site contract tests. | Closed |
 | R29 | P1 | Added a public command registry shared by keyboard and context actions, with move-before, move-after, indent, outdent, disabled state, and transaction semantics. | `runtime/commands.ts`, `editor-types.ts`, `MindMapEditor.tsx`; `commands.test.ts` and keyboard move E2E. | Closed |
-| R30 | P1 | Reconciled documented props, refs, messages, toolbar controls, export methods, events, shortcuts, and entry examples with the current declarations and browser behavior. | `site/src/pages/docs/api.astro`, READMEs, migration guide; declaration build, packed type consumer, docs/E2E checks. | Closed |
+| R30 | P1 | Reconciled documented props, refs, messages, toolbar controls, export methods, events, shortcuts, and entry examples with the current declarations and browser behavior. | `site/src/components/DocsContent.tsx`, READMEs, migration guide; declaration build, packed type consumer, and site contract tests. | Closed |
 
 ## Security requirement closure
 
@@ -111,7 +111,7 @@ The audit did not find a source-backed XSS, secret, shell-injection, path-traver
 
 | ID | Priority | Finding and control | Source and regression evidence | Status |
 | --- | --- | --- | --- | --- |
-| R41 | P1 | Automatic light mode changed the base palette through `prefers-color-scheme`, but several site-specific colors were scoped only to an explicit `data-theme="light"` selection. This left navigation, documentation copy, runtime labels, CTA text, and the footer with dark-surface colors on a light page. Site colors now use semantic variables defined identically for automatic and explicit light modes, while code and runtime terminal surfaces retain their deliberate dark treatment. | `site/src/styles/global.css`; automatic/manual computed-style parity probe, 24-case site QA, and the 12-image desktop/mobile light/dark capture matrix. | Closed |
+| R41 | P1 | Site theming now follows `prefers-color-scheme` only, matching v0.7.1 and removing the superseded manual theme switch. Tailwind media variants and literal runtime theme tokens keep page chrome, documentation, and exported maps aligned in light and dark modes. | `site/src/styles/global.css`, `site/src/components/useSiteTheme.ts`, `site/src/data/siteTheme.ts`; theme-safe SVG tests and updated browser QA/capture scripts. | Closed |
 
 ## Feature matrix
 
@@ -153,7 +153,7 @@ The final validation workflow records these layers against one source fingerprin
 | Unit/integration | `pnpm test` |
 | Package | `pnpm build:lib`, `pnpm verify:boundaries`, and `pnpm verify:pack` |
 | Project build | Repository-required `npm run build` plus recorded Astro check/build |
-| Browser E2E | `pnpm test:e2e` using deterministic local AI and no real credentials |
+| Browser E2E | `pnpm test:e2e` with the website's public AI endpoint intercepted by deterministic response and failure fixtures; no real credentials |
 | Browser UX/accessibility | `pnpm qa:site` across declared pages, viewports, themes, console, overflow, and focus checks |
 | Visual evidence | `pnpm capture:site` desktop/mobile, light/dark, and reduced-motion captures with a manifest |
 | Performance | `pnpm benchmark` on fixed parse/layout, local edit, stream burst, and culling fixtures; measurements are descriptive and set no budget gate |

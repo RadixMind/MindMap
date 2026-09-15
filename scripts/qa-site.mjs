@@ -6,9 +6,9 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const baseUrl = process.env.OPEN_MINDMAP_BASE_URL ?? "http://127.0.0.1:4321";
 const pages = [
-  { name: "home", path: "/", selectors: [".hero h1", ".hero-runtime", ".runtime-lab", "#benchmarks"] },
-  { name: "playground", path: "/playground/", selectors: [".playground-app", ".mm-editor", ".mm-feature-ai-composer"] },
-  { name: "docs", path: "/docs/", selectors: [".docs-content h1", "#runtime", "#api"] },
+  { name: "home", path: "/", selectors: ["h1", "#demo .legacy-playground", "[data-highlight-grid]", "#extensions"] },
+  { name: "docs", path: "/docs/", selectors: [".docs-content", "#getting-started", "#api-reference"] },
+  { name: "live", path: "/live/", selectors: [".legacy-playground--fullscreen", ".mm-editor", "[aria-label='AI mind map prompt']"] },
 ];
 const viewports = [
   { name: "desktop", width: 1440, height: 1000 },
@@ -22,9 +22,6 @@ const browser = await chromium.launch({ headless: true });
 async function inspect(name, path, viewport, theme, reducedMotion, selectors) {
   const page = await browser.newPage({ viewport });
   await page.emulateMedia({ colorScheme: theme, reducedMotion: reducedMotion ? "reduce" : "no-preference" });
-  await page.addInitScript(() => {
-    try { localStorage.removeItem("open-mindmap-theme"); } catch { /* storage may be unavailable */ }
-  });
   const errors = [];
   const networkErrors = [];
   page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
@@ -38,7 +35,6 @@ async function inspect(name, path, viewport, theme, reducedMotion, selectors) {
   let item;
   try {
     const response = await page.goto(`${baseUrl}${path}`, { waitUntil: "networkidle" });
-    await page.evaluate(() => { document.documentElement.dataset.theme = "auto"; });
     const missing = [];
     for (const selector of selectors) {
       const locator = page.locator(selector).first();
@@ -59,30 +55,17 @@ async function inspect(name, path, viewport, theme, reducedMotion, selectors) {
       target.focus();
       return { passed: document.activeElement === target, tag: target.tagName, label: target.getAttribute("aria-label") ?? target.textContent?.trim().slice(0, 80) };
     });
-    let mobileMenuOpened = false;
-    if (viewport.width < 768) {
-      const mobileMenu = page.locator("details.mobile-menu").first();
-      const mobileSummary = mobileMenu.locator("summary").first();
-      if (await mobileMenu.count() && await mobileSummary.count()) {
-        const isOpen = await mobileMenu.getAttribute("open");
-        if (isOpen === null) {
-          await mobileSummary.focus();
-          await mobileSummary.press("Enter");
-        }
-        mobileMenuOpened = (await mobileMenu.getAttribute("open")) !== null;
+    let docsMenuOpened = false;
+    if (viewport.width < 768 && name.startsWith("docs-")) {
+      const trigger = page.locator("[data-docs-menu]").first();
+      if (await trigger.count()) {
+        await trigger.focus();
+        await trigger.press("Enter");
+        docsMenuOpened = await page.locator("[data-docs-overlay]").evaluate((element) => !element.hidden);
+        await page.locator("[data-docs-close]").click();
       }
     }
-    const themeToggle = page.locator("[data-theme-toggle]:visible").first();
-    let interaction = { passed: true, themeToggled: false, themeAfterToggle: null, mobileMenuOpened };
-    if (await themeToggle.count()) {
-      await themeToggle.focus();
-      const focused = await page.evaluate(() => document.activeElement?.matches("[data-theme-toggle]") ?? false);
-      await themeToggle.click();
-      const themeAfterToggle = await page.locator("html").getAttribute("data-theme");
-      interaction = { passed: focused && (themeAfterToggle === "light" || themeAfterToggle === "dark"), themeToggled: true, themeAfterToggle, mobileMenuOpened };
-    } else {
-      interaction = { passed: false, themeToggled: false, themeAfterToggle: null, mobileMenuOpened };
-    }
+    const interaction = { passed: viewport.width >= 768 || !name.startsWith("docs-") || docsMenuOpened, docsMenuOpened };
     item = {
       name,
       path,
@@ -111,7 +94,7 @@ async function inspect(name, path, viewport, theme, reducedMotion, selectors) {
       networkErrors,
       horizontalOverflow: false,
       focus: { passed: false },
-      interaction: { passed: false, themeToggled: false, themeAfterToggle: null, mobileMenuOpened: false },
+      interaction: { passed: false, docsMenuOpened: false },
       metrics: null,
     };
   } finally {

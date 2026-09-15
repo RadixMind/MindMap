@@ -1,32 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
-export type SiteTheme = 'auto' | 'light' | 'dark'
+type SiteTheme = 'light' | 'dark'
+const QUERY = '(prefers-color-scheme: dark)'
 
-export const SITE_THEME_CHANGE_EVENT = 'open-mindmap:theme-change'
+function readTheme(): SiteTheme {
+  return window.matchMedia?.(QUERY).matches ? 'dark' : 'light'
+}
 
-function readSiteTheme(): SiteTheme {
-  if (typeof document === 'undefined') return 'auto'
-  const value = document.documentElement.dataset.theme
-  return value === 'light' || value === 'dark' ? value : 'auto'
+function subscribe(onChange: () => void): () => void {
+  const media = window.matchMedia?.(QUERY)
+  media?.addEventListener?.('change', onChange)
+  return () => media?.removeEventListener?.('change', onChange)
 }
 
 export function useSiteTheme(): SiteTheme {
-  const [theme, setTheme] = useState<SiteTheme>('auto')
-
-  useEffect(() => {
-    const root = document.documentElement
-    const syncTheme = () => setTheme(readSiteTheme())
-    const observer = new MutationObserver(syncTheme)
-
-    syncTheme()
-    window.addEventListener(SITE_THEME_CHANGE_EVENT, syncTheme)
-    observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] })
-
-    return () => {
-      window.removeEventListener(SITE_THEME_CHANGE_EVENT, syncTheme)
-      observer.disconnect()
-    }
-  }, [])
-
-  return theme
+  return useSyncExternalStore(subscribe, readTheme, () => 'light')
 }

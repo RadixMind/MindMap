@@ -1,129 +1,267 @@
 ---
+import {
+  Bot,
+  Check,
+  CircleCheck,
+  Copy,
+  Download,
+  FoldVertical,
+  Gauge,
+  Image,
+  Keyboard,
+  Languages,
+  Moon,
+  MousePointerClick,
+  NotebookPen,
+  NotebookText,
+  Package,
+  Palette,
+  Settings,
+  Smartphone,
+  Spline,
+  SquareFunction,
+  Tag,
+  Terminal,
+  Workflow,
+} from 'lucide-react'
+import PlaygroundIsland from '../components/PlaygroundIsland'
+import CodeHighlight from '../components/codeHighlight'
 import SiteLayout from '../layouts/SiteLayout.astro'
-import HeroMindMap from '../components/HeroMindMap'
-import RuntimeLab from '../components/RuntimeLab'
+import sitePackage from '../../package.json'
+import '../styles/playground.css'
+
+const highlights = [
+  { icon: Bot, title: 'AI Generation', desc: 'Connect a host-owned generator, stream Markdown updates, and optionally accept supported attachments.' },
+  { icon: Image, title: 'Pure SVG Rendering', desc: 'No Canvas or external layout engine. Maps remain crisp at every zoom level.' },
+  { icon: Smartphone, title: 'Interactive Editor', desc: 'Editing, selection, panning, zooming, and focused controls in a composable React surface.' },
+  { icon: Moon, title: 'Dark Mode', desc: 'Follow the system color scheme or explicitly select a light or dark runtime theme.' },
+  { icon: Palette, title: 'CSS Customizable', desc: 'Use surface-specific stylesheets and semantic theme tokens to match your product.' },
+  { icon: Keyboard, title: 'Keyboard First', desc: 'Create, edit, move, fold, copy, paste, undo, and navigate without leaving the keyboard.' },
+  { icon: Package, title: 'Modular Entries', desc: 'Choose Core, Static, Viewer, or Editor and add Features only when your interface needs them.' },
+  { icon: MousePointerClick, title: 'Mobile & Touch', desc: 'Pan, zoom, select, and edit through pointer and touch-friendly controls.' },
+  { icon: Languages, title: 'Internationalization', desc: 'Built-in English and Simplified Chinese messages with host-provided overrides.' },
+  { icon: Download, title: 'Export Anywhere', desc: 'Export SVG, PNG, Markdown, JSON, or a plain-text outline through explicit Features.' },
+  { icon: NotebookPen, title: 'Markdown Editor', desc: 'Add an opt-in source editor while the controller keeps the visual document synchronized.' },
+  { icon: Gauge, title: 'Read-only Viewer', desc: 'Use the dedicated Viewer entry for navigation and selection without editor mutations.' },
+]
+
+const extensions = [
+  { icon: Settings, name: 'Frontmatter', syntax: '---\ndirection: right\ntheme: dark\n---', desc: 'Set document direction and theme from a YAML header.' },
+  { icon: Spline, name: 'Dotted Lines', syntax: '-. Dashed child node', desc: 'Use dotted connections for secondary relationships.' },
+  { icon: FoldVertical, name: 'Folding', syntax: '+ Collapsed group\n  - Hidden child', desc: 'Persist collapsed branches in the document.' },
+  { icon: NotebookText, name: 'Multi-line', syntax: '- Title\n  | Detail line 1\n  | Detail line 2', desc: 'Attach multiple display lines to one node.' },
+  { icon: Tag, name: 'Tags', syntax: '- React #frontend #lib', desc: 'Categorize and filter nodes with namespaced attributes.' },
+  { icon: Workflow, name: 'Cross Links', syntax: '- Node {#a}\n  -> {#b} "ref"', desc: 'Connect nodes outside the parent-child tree.' },
+  { icon: SquareFunction, name: 'LaTeX Math', syntax: '- Inline: $E = mc^2$\n- Block: $$\\sum x_i$$', desc: 'Render formulas through the optional KaTeX peer.' },
+]
+
+const markdownExample = `Project Roadmap
+- **Phase 1** — Foundation
+  - [x] Setup repository
+  - [x] Core architecture
+  - [-] API design
+    > Explicit package entries
+- *Phase 2* — Features
+  - [ ] Search and history
+  - [ ] \`Markdown\` editor
+  - [ ] ==Export workflow==
+- Resources
+  - [Docs](/docs/)
+  - ~~Private source imports~~`
+
+const reactExample = `import { MindMapEditor } from '@xiangfa/mindmap/editor'
+import '@xiangfa/mindmap/styles/editor.css'
+
+export function Map() {
+  return <MindMapEditor
+    markdown={content}
+    extensions={extensions}
+    features={features}
+    onMarkdownChange={save}
+  />
+}`
 ---
-<SiteLayout>
-  <section class="hero">
-    <div class="shell shell--wide hero__grid">
-      <div class="hero__copy">
-        <h1>Structure ideas.<em>Ship only what matters.</em></h1>
-        <p class="hero__lead">Streaming Markdown visualized as thought. Start with deterministic SVG, add a viewer, or compose a focused editor from opt-in features.</p>
-        <div class="hero__actions">
-          <a class="button button--primary" href="/playground/">Open playground <span aria-hidden="true">↗</span></a>
-          <a class="button button--secondary" href="/docs/getting-started/">Read docs</a>
+<SiteLayout
+  active="home"
+  title="Open MindMap - Interactive Mind Map Runtime for React"
+  description="A modular React and TypeScript runtime for interactive SVG mind maps, Markdown streaming, viewing, editing, Features, and Extensions."
+>
+  <main id="main-content" class="hero-gradient overflow-hidden">
+    <section class="mx-auto max-w-7xl px-4 pb-16 pt-28 text-center md:px-6">
+      <div class="hero-animate mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 md:mb-8">
+        <Terminal size={14} aria-hidden="true" />
+        v{sitePackage.version} &middot; Open Source
+      </div>
+      <h1 class="text-gradient hero-animate mb-6 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl md:mb-8 md:text-7xl">The AI-Native<br />Mindmap for React.</h1>
+      <p class="hero-animate-delayed mx-auto mb-8 max-w-2xl text-base font-medium leading-relaxed text-slate-500 dark:text-slate-400 md:mb-12 md:text-xl">
+        Transform complex mental models into structured visual systems with natural language. Open source, extensible, and built for the modern web.
+      </p>
+
+      <div class="hero-animate-delayed relative mx-auto mb-10 max-w-md md:mb-16">
+        <div class="code-glow group flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-3 text-left font-mono text-xs md:text-sm">
+          <div class="flex min-w-0 items-center gap-2 md:gap-3"><span class="shrink-0 text-primary-fixed-dim">$</span><span class="truncate text-slate-300">npm install <span class="text-white">@xiangfa/mindmap</span></span></div>
+          <button class="install-copy-button ml-2 shrink-0 p-1 text-slate-500 transition-colors hover:text-white" type="button" data-copy-install data-copied="false" aria-label="Copy install command">
+            <Copy className="install-copy-icon" size={16} aria-hidden="true" />
+            <Check className="install-check-icon" size={16} aria-hidden="true" />
+          </button>
+        </div>
+        <span class="install-copy-status absolute right-0 top-full mt-2 text-xs text-slate-500" role="status" aria-live="polite" data-copy-status></span>
+      </div>
+
+      <div class="hero-animate-delayed-2 flex flex-col items-center justify-center gap-3 sm:flex-row md:gap-4">
+        <a href="#demo" class="w-full rounded-full bg-slate-900 px-8 py-3 text-center text-sm font-semibold text-white transition-all hover:scale-[1.02] hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 sm:w-auto md:py-3.5 md:text-base">Start Building</a>
+        <a href="#demo" class="w-full rounded-full border border-slate-200 bg-white px-8 py-3 text-center text-sm font-semibold text-slate-900 transition-all hover:scale-[1.02] hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 sm:w-auto md:py-3.5 md:text-base">View Demo</a>
+      </div>
+    </section>
+
+    <section id="demo" class="mx-auto mb-20 max-w-7xl px-4 md:mb-40 md:px-6" data-animate>
+      <PlaygroundIsland client:load />
+    </section>
+
+    <section id="features" class="mx-auto mb-20 max-w-7xl px-4 md:mb-40 md:px-6" data-animate>
+      <div class="relative flex flex-col items-center gap-8 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800/50 md:p-16 lg:flex-row lg:gap-16">
+        <div class="z-10 flex-1">
+          <span class="mb-4 block text-[11px] font-bold uppercase tracking-widest text-primary">Core Engine</span>
+          <h2 class="mb-4 text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:mb-6 md:text-4xl">Real-time AI Streaming.</h2>
+          <p class="mb-6 text-base leading-relaxed text-slate-500 dark:text-slate-400 md:mb-8 md:text-lg">Append Markdown as it arrives. The v0.9 controller publishes immutable previews, preserves stable node identities, and commits the completed generation as one history entry.</p>
+          <ul class="space-y-4">
+            <li class="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300"><CircleCheck className="text-primary" size={20} aria-hidden="true" />Incremental Markdown parsing</li>
+            <li class="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300"><CircleCheck className="text-primary" size={20} aria-hidden="true" />Transactional stream commit and rollback</li>
+            <li class="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300"><CircleCheck className="text-primary" size={20} aria-hidden="true" />OpenAI-compatible and custom generators</li>
+            <li class="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300"><CircleCheck className="text-primary" size={20} aria-hidden="true" />Host-owned credentials and attachments</li>
+          </ul>
+        </div>
+        <div class="relative flex-1">
+          <div class="relative flex aspect-square w-full items-center justify-center">
+            <div class="absolute inset-0 animate-pulse rounded-full bg-primary/5"></div>
+            <div class="relative rounded-3xl border border-primary/10 bg-white p-8 shadow-xl dark:bg-slate-800">
+              <div class="space-y-3">
+                <div class="h-2 w-48 overflow-hidden rounded-full bg-primary/20"><div class="h-full w-2/3 bg-primary" style="animation: shimmer 2s infinite"></div></div>
+                <div class="h-2 w-32 rounded-full bg-primary/10"></div>
+                <div class="h-2 w-40 rounded-full bg-primary/10"></div>
+              </div>
+            </div>
+            <div class="animate-float absolute right-10 top-10 h-4 w-4 rounded-full bg-primary/20"></div>
+            <div class="animate-float-delayed absolute bottom-20 left-0 h-6 w-6 rounded-full bg-primary/10"></div>
+          </div>
         </div>
       </div>
-      <div class="hero__visual">
-        <HeroMindMap client:load />
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <div class="trust-strip">
-    <div class="shell trust-strip__inner">
-      <div class="trust-strip__install"><span>Install</span><code>pnpm add @xiangfa/mindmap</code></div>
-      <div class="trust-strip__items">
-        <span>React 18-19</span><span>TypeScript</span><span>Pure SVG</span><span>SSR-ready core</span><span>AI streaming</span>
+    <section id="highlights" class="mx-auto mb-20 max-w-7xl px-4 md:mb-40 md:px-6" data-animate>
+      <div class="mb-10 text-center md:mb-16">
+        <h2 class="mb-4 text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl">Everything you need.</h2>
+        <p class="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-500 dark:text-slate-400 md:text-lg">A complete mind-mapping toolkit built from explicit runtime surfaces, optional Features, pure SVG, and accessible interaction.</p>
       </div>
-    </div>
-  </div>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-4" data-highlight-grid>
+        {highlights.map(({ icon: Icon, title, desc }) => (
+          <article class="rounded-xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition-shadow duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:bg-slate-800 dark:shadow-[0_2px_12px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)]" data-highlight-card>
+            <div class="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/5"><Icon className="text-primary" size={20} aria-hidden="true" /></div>
+            <h3 class="mb-1 font-bold text-slate-900 dark:text-white">{title}</h3>
+            <p class="text-sm leading-relaxed text-slate-500 dark:text-slate-400">{desc}</p>
+          </article>
+        ))}
+      </div>
+    </section>
 
-  <section class="section" id="runtime">
-    <div class="shell">
-      <div class="section-heading">
-        <div><h2>A runtime that ends where your product begins.</h2></div>
-        <p>Most users need a viewer. Editors need a focused command loop. Open MindMap v0.9.0 keeps each runtime explicit so product surfaces can stay small and testable.</p>
+    <section id="extensions" class="mx-auto mb-20 max-w-7xl px-4 md:mb-40 md:px-6" data-animate>
+      <div class="mb-10 text-center md:mb-16">
+        <span class="mb-4 block text-[11px] font-bold uppercase tracking-widest text-primary">Extensible</span>
+        <h2 class="mb-4 text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl">Extend with Extensions.</h2>
+        <p class="mx-auto max-w-2xl text-base font-medium leading-relaxed text-slate-500 dark:text-slate-400 md:text-lg">Seven built-in Extensions transform syntax and layout through stable, opt-in hooks.</p>
       </div>
-      <RuntimeLab client:visible />
-    </div>
-  </section>
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" data-extension-grid>
+        {extensions.map(({ icon: Icon, name, syntax, desc }) => (
+          <article class="group rounded-xl bg-slate-50 p-5 transition-all duration-300 hover:bg-white hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] dark:bg-slate-800/50 dark:hover:bg-slate-800 dark:hover:shadow-[0_4px_16px_rgba(0,0,0,0.2)]" data-extension-card>
+            <div class="mb-3 flex items-center gap-3"><div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/15"><Icon className="text-primary" size={18} aria-hidden="true" /></div><h3 class="font-bold text-slate-900 dark:text-white">{name}</h3></div>
+            <p class="mb-3 text-sm text-slate-500 dark:text-slate-400">{desc}</p>
+            <pre class="whitespace-pre-wrap rounded-lg bg-white p-3 font-mono text-[12px] leading-relaxed text-slate-600 dark:bg-slate-900 dark:text-slate-300">{syntax}</pre>
+          </article>
+        ))}
+      </div>
+    </section>
 
-  <section class="section section--line">
-    <div class="shell">
-      <div class="section-heading">
-        <div><h2>From incomplete text to a stable visual system.</h2></div>
-        <p>Incoming model output is grouped by render frame, parsed into stable node identities, diffed as immutable patches, and laid out without browser-only dependencies.</p>
-      </div>
-      <div class="pipeline">
-        <article class="pipeline__stage">
-          <div class="pipeline__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16M4 10h11M4 15h14M4 20h8" /></svg></div>
-          <h3>Streaming buffer</h3><p>Incomplete chunks are coalesced before they reach the React surface.</p>
-        </article>
-        <article class="pipeline__stage">
-          <div class="pipeline__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 4H4v16h4M16 4h4v16h-4M9 8l-2 4 2 4M15 8l2 4-2 4" /></svg></div>
-          <h3>Stable parser</h3><p>Markdown, frontmatter, tasks, and remarks become a deterministic document.</p>
-        </article>
-        <article class="pipeline__stage">
-          <div class="pipeline__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12c6 0 5-6 10-6M7 12c6 0 5 6 10 6"/></svg></div>
-          <h3>Patch controller</h3><p>Insert, update, move, and remove operations preserve identity and history.</p>
-        </article>
-        <article class="pipeline__stage">
-          <div class="pipeline__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h18v14H3z"/><path d="M7 15c3-7 7 3 10-6"/></svg></div>
-          <h3>SVG scene</h3><p>Static, viewer, and editor surfaces share the same deterministic geometry.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section--line">
-    <div class="shell">
-      <div class="section-heading">
-        <div><h2>Advanced when invited. Invisible when omitted.</h2></div>
-        <p>History, search, import, export, Markdown editing, AI, folding, tags, multiline nodes, and dotted connections all live behind independent entry points.</p>
-      </div>
-      <div class="bento">
-        <article class="bento-card bento-card--wide">
-          <h3>Compose the exact editor.</h3><p>The base editor exposes commands and slots. Every advanced tool contributes behavior and interface without expanding the core contract.</p>
-          <div class="module-stack" aria-hidden="true"><span>editor <i>base</i></span><span>features/history <i>on demand</i></span><span>features/search <i>on demand</i></span><span>features/ai <i>on demand</i></span></div>
-        </article>
-        <article class="bento-card bento-card--side">
-          <h3>SVG for sight. A semantic tree for assistive tech.</h3><p>Keyboard navigation, visible focus, non-drag alternatives, and reduced-motion behavior are treated as runtime features, not documentation notes.</p>
-          <div class="accessibility-tree" aria-hidden="true"><span>role="tree"</span><span>├─ aria-level="1"</span><span>├─ aria-expanded</span><span>└─ aria-selected</span></div>
-        </article>
-        <article class="bento-card bento-card--third">
-          <h3>No React. No DOM.</h3><p>Use parser, layout, patches, streaming, and standalone SVG generation in workers, servers, or custom renderers.</p>
-          <div class="mini-chart" aria-hidden="true"><i style="height:24%"></i><i style="height:40%"></i><i style="height:33%"></i><i style="height:62%"></i><i style="height:52%"></i><i style="height:77%"></i><i style="height:68%"></i><i style="height:88%"></i></div>
-        </article>
-        <article class="bento-card bento-card--third">
-          <h3>Styles split with behavior.</h3><p>Static, viewer, editor, and every feature publish independent stylesheets that match their public entrypoints.</p>
-        </article>
-        <article class="bento-card bento-card--third">
-          <h3>Adopt one surface at a time.</h3><p>The root <code>MindMap</code> export maps to the editor runtime while explicit entries make new viewer and static surfaces easy to adopt.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section--line" id="benchmarks">
-    <div class="shell">
-      <div class="section-heading">
-        <div><h2>Keep claims close to the code.</h2></div>
-        <p>Release checks cover the parser, layout, controller, public entrypoints, and website package. Numeric results appear here only after the current build writes fresh artifacts.</p>
-      </div>
-      <div class="benchmark-panel">
-        <div class="benchmark-intro">
-          <h3>Reproducible by design.</h3>
-          <p>The site reports what has been verified in the current checkout and leaves pending measurements clearly marked until the build completes.</p>
-          <div class="benchmark-meta"><span>core tests</span><span>entry checks</span><span>site build</span><span>visual review</span></div>
+    <section id="syntax" class="mx-auto mb-20 max-w-7xl px-4 md:mb-40 md:px-6" data-animate>
+      <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <h2 class="mb-4 text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:mb-6 md:text-4xl">Write Markdown.<br />See Mind Maps.</h2>
+          <p class="mb-6 text-base leading-relaxed text-slate-500 dark:text-slate-400 md:mb-8 md:text-lg">Use familiar Markdown to describe ideas. Open MindMap parses it into a deterministic Document and renders an interactive SVG projection.</p>
+          <ul class="space-y-4">
+            {[
+              'Inline formatting — bold, italic, code, strikethrough, highlight',
+              'Task markers — todo, done, and in-progress states',
+              'Remarks — attach multi-line notes to any node',
+              'Multi-root — multiple independent trees on one surface',
+              'Drag and keyboard movement — reorder or reparent nodes',
+              'Text editing — keep Markdown and visual edits synchronized',
+            ].map(item => <li class="flex items-start gap-3 text-sm font-medium text-slate-700 dark:text-slate-300"><Check className="mt-0.5 shrink-0 text-primary" size={18} aria-hidden="true" />{item}</li>)}
+          </ul>
         </div>
-        <div class="benchmark-data">
-          <div class="metric"><span>Parser and layout</span><strong>Ready</strong><em>covered by core tests</em></div>
-          <div class="metric"><span>Public package paths</span><strong>Ready</strong><em>checked during build</em></div>
-          <div class="metric"><span>Browser measurements</span><strong>Pending</strong><em>generated after validation</em></div>
-          <div class="metric"><span>Bundle numbers</span><strong>Pending</strong><em>never estimated on the site</em></div>
+        <div class="overflow-hidden rounded-2xl bg-slate-900 p-1 shadow-2xl">
+          <div class="bg-slate-800/50 p-6 font-mono text-[13px] leading-relaxed text-slate-300">
+            <div class="mb-6 flex gap-2 opacity-30"><div class="h-3 w-3 rounded-full bg-white"></div><div class="h-3 w-3 rounded-full bg-white"></div><div class="h-3 w-3 rounded-full bg-white"></div></div>
+            <pre class="syntax-highlight whitespace-pre"><CodeHighlight code={markdownExample} language="mindmap" /></pre>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="cta">
-    <div class="shell">
-      <div class="cta__panel">
-        <h2>Build the map your interface actually needs.</h2>
-        <p>Open the full feature playground, or begin with the lightweight Viewer and add only the capabilities that survive your product requirements.</p>
-        <div class="cta__actions"><a class="button button--primary" href="/playground/">Open playground</a><a class="button button--secondary" href="/docs/getting-started/">Read docs</a></div>
+    <section class="mx-auto mb-20 max-w-7xl px-4 md:mb-40 md:px-6" data-animate>
+      <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <h2 class="mb-4 text-2xl font-bold tracking-tight text-slate-900 dark:text-white md:mb-6 md:text-4xl">Built for the React Ecosystem.</h2>
+          <p class="mb-6 text-base leading-relaxed text-slate-500 dark:text-slate-400 md:mb-8 md:text-lg">Choose a focused runtime surface, pass Markdown or a Document, and compose only the Features and Extensions your application needs.</p>
+          <div class="grid grid-cols-2 gap-8">
+            <div><h3 class="mb-1 font-bold text-slate-900 dark:text-white">TypeScript Native</h3><p class="text-sm text-slate-500 dark:text-slate-400">Public types cover Documents, nodes, patches, controllers, surfaces, Features, and Extensions.</p></div>
+            <div><h3 class="mb-1 font-bold text-slate-900 dark:text-white">Extension System</h3><p class="text-sm text-slate-500 dark:text-slate-400">Transform parsing, serialization, visibility, edges, or layout through stable hooks.</p></div>
+          </div>
+        </div>
+        <div class="overflow-hidden rounded-2xl bg-slate-900 p-1 shadow-2xl">
+          <div class="bg-slate-800/50 p-6 font-mono text-sm leading-relaxed text-slate-300">
+            <div class="mb-6 flex gap-2 opacity-30"><div class="h-3 w-3 rounded-full bg-white"></div><div class="h-3 w-3 rounded-full bg-white"></div><div class="h-3 w-3 rounded-full bg-white"></div></div>
+            <pre class="syntax-highlight whitespace-pre-wrap"><CodeHighlight code={reactExample} language="tsx" /></pre>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <section class="mx-auto mb-20 max-w-7xl border-t border-slate-100 px-4 pt-16 text-center dark:border-slate-800 md:mb-40 md:px-6 md:pt-24" data-animate>
+      <p class="mb-10 text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 md:mb-16">Built on open web standards</p>
+      <div class="flex flex-wrap items-center justify-center gap-8 opacity-40 grayscale sm:gap-16 md:gap-24">
+        {['React 18–19', 'TypeScript', 'Pure SVG', 'Markdown', 'Astro'].map((item, index) => <div class:list={['ecosystem-wordmark text-xl font-black md:text-2xl', index === 2 && 'italic underline decoration-4 decoration-primary', index === 4 && 'font-serif']}>{item}</div>)}
+      </div>
+    </section>
+
+    <section class="mx-auto mb-20 max-w-7xl px-4 md:mb-40 md:px-6" data-animate>
+      <div class="relative overflow-hidden rounded-2xl bg-slate-900 p-8 text-center text-white md:p-20">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,122,255,0.15)_0%,transparent_70%)]"></div>
+        <h2 class="relative z-10 mb-6 text-3xl font-bold tracking-tight text-white md:mb-8 md:text-6xl">Precision in Thought.</h2>
+        <p class="relative z-10 mx-auto mb-8 max-w-xl text-base font-medium leading-relaxed text-slate-400 md:mb-12 md:text-xl">An open-source toolkit for visual thinking in the React ecosystem.</p>
+        <div class="relative z-10 flex flex-col items-center justify-center gap-3 sm:flex-row md:gap-4">
+          <a href="#demo" class="w-full rounded-full bg-primary px-8 py-3.5 text-center text-base font-bold text-white transition-all hover:scale-[1.02] hover:bg-primary/90 sm:w-auto md:px-10 md:py-4 md:text-lg">Get Started Free</a>
+          <a href="/docs/" class="w-full rounded-full border border-white/10 bg-white/5 px-8 py-3.5 text-center text-base font-bold text-white transition-all hover:bg-white/10 sm:w-auto md:px-10 md:py-4 md:text-lg">View Documentation</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const button = document.querySelector('[data-copy-install]');
+    const status = document.querySelector('[data-copy-status]');
+    button?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText('npm install @xiangfa/mindmap');
+        button.setAttribute('data-copied', 'true');
+        button.setAttribute('aria-label', 'Install command copied');
+        if (status) status.textContent = 'Copied';
+        window.setTimeout(() => {
+          button.setAttribute('data-copied', 'false');
+          button.setAttribute('aria-label', 'Copy install command');
+          if (status) status.textContent = '';
+        }, 2000);
+      } catch {
+        if (status) status.textContent = 'Select the command and copy it manually.';
+      }
+    });
+  </script>
 </SiteLayout>

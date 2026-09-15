@@ -1,3 +1,15 @@
 ---
-return Astro.redirect('/playground/', 301)
+import PlaygroundIsland from '../components/PlaygroundIsland'
+import SiteLayout from '../layouts/SiteLayout.astro'
+import '../styles/playground.css'
 ---
+<SiteLayout
+  chrome={false}
+  pageClass="live-page-body"
+  title="Live Editor - Open MindMap v0.9.0"
+  description="A full-screen Open MindMap v0.9.0 editor with Markdown, Features, Extensions, and remote AI streaming."
+>
+  <main id="main-content" class="live-page">
+    <PlaygroundIsland fullscreen client:load />
+  </main>
+</SiteLayout>
